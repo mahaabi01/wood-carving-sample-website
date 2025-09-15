@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 export default function Footer() {
@@ -10,9 +11,21 @@ export default function Footer() {
             Quick Links
           </h3>
           <ul className="space-y-2">
-            <li><a href="#" className="hover:underline">About Us</a></li>
-            <li><a href="#" className="hover:underline">Shop</a></li>
-            <li><a href="#" className="hover:underline">Our Team</a></li>
+            <li>
+              <Link href="/about" className="hover:underline">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link href="/shop" className="hover:underline">
+                Shop
+              </Link>
+            </li>
+            <li>
+              <Link href="/blog" className="hover:underline">
+                Our Blog
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -21,8 +34,8 @@ export default function Footer() {
           <h3 className="text-lg font-semibold border-b-2 border-red-500 inline-block mb-4">
             Contact Info
           </h3>
-          <p>9863825276</p>
-          <p>info@oneworldcatering.com</p>
+          <p>9803845226</p>
+          <p>info@omwoodcarving.com</p>
           <p>Lalitpur, Nepal</p>
         </div>
 
@@ -32,9 +45,46 @@ export default function Footer() {
             Follow Us
           </h3>
           <ul className="space-y-2">
-            <li><a href="#" className="hover:underline">Facebook</a></li>
-            <li><a href="#" className="hover:underline">Instagram</a></li>
-            <li><a href="#" className="hover:underline">YouTube</a></li>
+            <li>
+              <Link
+                href="https://www.tiktok.com/@omwoodcarving"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                Facebook
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="https://www.tiktok.com/@omwoodcarving"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                Instagram
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="https://www.tiktok.com/@omwoodcarving"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                TikTok
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="https://www.tiktok.com/@omwoodcarving"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                YouTube
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -57,7 +107,17 @@ export default function Footer() {
       {/* Footer Bottom */}
       <div className="border-t border-white mt-6 pt-4 text-sm text-center flex flex-col sm:flex-row justify-between items-center">
         <p>2025 © All Rights Reserved. One World Catering</p>
-        <p>Developed By: <span className="text-red-400">Plop Technology</span></p>
+        <p>
+          Developed By:{" "}
+          <Link
+            href="https://abilashmaharjan.com.np"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-red-400 hover:underline"
+          >
+            Abilash Maharjan{" "}
+          </Link>
+        </p>
       </div>
     </footer>
   );

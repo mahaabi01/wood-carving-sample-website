@@ -85,7 +85,7 @@ const Contact: React.FC = () => {
         <h2 className="text-xl font-semibold mb-2">Contact Information</h2>
         <p>Address: 123 Woodcarving Lane, Kathmandu, Nepal</p>
         <p>Phone: +977 1 2345678</p>
-        <p>Email: info@woodcarving.com</p>
+        <p>Email: info@omwoodcarving.com</p>
       </section>
     </main>
   );

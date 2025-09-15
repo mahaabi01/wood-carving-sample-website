@@ -4,7 +4,7 @@ export default function AboutSection() {
   return (
     <section className="container mx-auto py-12 px-4 grid md:grid-cols-2 gap-8 items-center">
       <Image
-        src="/about.jpg" // replace with actual image
+        src="/sample image/image1.jpg" // replace with actual image
         alt="About Us"
         width={600}
         height={400}

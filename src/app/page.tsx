@@ -7,10 +7,10 @@ import Footer from "@/components/Footer";
 
 export default function HomePage() {
   const products = [
-    { name: "Wood Carving Kalash", price: "Rs. 14,000.00", img: "/product1.jpg" },
-    { name: "Peacock Traditional Wood Carving", price: "Rs. 16,000.00", img: "/product2.jpg" },
-    { name: "Wooden Yellow Statue", price: "Rs. 46,000.00", img: "/product3.jpg" },
-    { name: "Antique Peacock Window", price: "Rs. 42,000.00", img: "/product4.jpg" },
+    { name: "Wood Carving Kalash", price: "Rs. 14,000.00", img: "/sample image/image2.jpg" },
+    { name: "Peacock Traditional Wood Carving", price: "Rs. 16,000.00", img: "/sample image/image3.jpg" },
+    { name: "Wooden Yellow Statue", price: "Rs. 46,000.00", img: "/sample image/image4.jpg" },
+    { name: "Antique Peacock Window", price: "Rs. 42,000.00", img: "/sample image/image5.jpg" },
   ];
 
   return (

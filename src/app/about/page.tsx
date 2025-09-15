@@ -69,7 +69,7 @@ export default function AboutPage() {
       <section className="container mx-auto py-12 px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Our Workshop</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {["workshop1.jpg", "workshop2.jpg", "workshop3.jpg"].map((img, i) => (
+          {["sample image/image6.jpg", "sample image/image7.jpg", "sample image/image8.jpg"].map((img, i) => (
             <div key={i} className="overflow-hidden rounded-lg shadow-lg">
               <Image
                 src={`/${img}`} // replace with actual workshop images
