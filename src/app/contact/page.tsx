@@ -6,21 +6,45 @@ const Contact: React.FC = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name] : value
+    })
+    // setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setStatus("Sending...");
 
-    // For demo, just simulate sending
-    setStatus("Sending...");
+  try {
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
-    setTimeout(() => {
+    const data = await res.json();
+
+    if (res.ok) {
       setStatus("Message sent! Thank you.");
       setForm({ name: "", email: "", message: "" });
-    }, 1500);
-  };
+    } else {
+      setStatus(`Error: ${data.message}`);
+    }
+  } catch (error) {
+    setStatus("Failed to send message. Please try again later.");
+  }
+};
+
+    // setTimeout(() => {
+    //   setStatus("Message sent! Thank you.");
+    //   setForm({ name: "", email: "", message: "" });
+    // }, 1500);
 
   return (
     <main className="max-w-xl mx-auto p-6">
@@ -72,6 +96,7 @@ const Contact: React.FC = () => {
         </div>
 
         <button
+          onSubmit={handleSubmit}
           type="submit"
           className="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700 transition"
         >
@@ -83,12 +108,13 @@ const Contact: React.FC = () => {
 
       <section className="mt-12 border-t pt-6 text-gray-700">
         <h2 className="text-xl font-semibold mb-2">Contact Information</h2>
-        <p>Address: 123 Woodcarving Lane, Kathmandu, Nepal</p>
+        <p>Address: Om Wood Carving, Bungamati, Lalitpur, Nepal</p>
         <p>Phone: +977 1 2345678</p>
         <p>Email: info@omwoodcarving.com</p>
       </section>
     </main>
   );
 };
+
 
 export default Contact;
