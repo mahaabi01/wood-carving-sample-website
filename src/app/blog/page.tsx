@@ -6,11 +6,11 @@ type BlogPost = {
   id: number;
   slug: string;
   title: string;
-  excerpt: string;
+  content: string;
   date: string;
 };
 
-// sample blog here 
+// sample blog here
 const blogPosts: BlogPost[] = [
   {
     id: 1,
@@ -88,10 +88,17 @@ const BlogList: React.FC = () => {
         {blogPosts.map((post) => (
           <li key={post.id} className="border-b pb-4">
             <Link href={`/blog/${post.slug}`}>
-              <div className="text-2xl font-semibold text-blue-600 hover:underline">{post.title}</div>
+              <div className="text-2xl font-semibold text-blue-600 hover:underline">
+                {post.title}
+              </div>
             </Link>
-            <p className="text-gray-600">{post.excerpt}</p>
-            <small className="text-gray-400">{new Date(post.date).toLocaleDateString()}</small>
+            <p className="text-gray-600">
+              {post.content.split(" ").slice(0, 15).join(" ")}...
+            </p>
+
+            <small className="text-gray-400">
+              {new Date(post.date).toLocaleDateString()}
+            </small>
           </li>
         ))}
       </ul>

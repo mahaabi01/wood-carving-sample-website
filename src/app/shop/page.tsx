@@ -4,6 +4,7 @@ import ProductCard from "@/components/ProductCard";
 
 type Product = {
   id: number;
+  slug: string;
   name: string;
   description: string;
   price: number;

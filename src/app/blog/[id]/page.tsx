@@ -76,8 +76,26 @@ const blogPosts: BlogPost[] = [
   },
 ];
 
-export default function BlogPostPage() {
-  const { slug } = useParams();
-  const items = blogPosts.find((post) => post.slug === slug);
-  console.log("Blog slug:", slug);
+const BlogPostPage: React.FC = () => {
+  const params = useParams();
+  const slug = params?.id as string;
+  const post = blogPosts.find((p) => p.slug === slug);
+
+  if(!post){
+    return <p className="p-6 text-center">Blog post not found.</p>
+  }
+
+
+  return (
+    <main className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-4 my-10">{post.title}</h1>
+      <p className="text-gray-600 mb-6">{new Date(post.date).toLocaleDateString()}</p>
+      <div className="prose prose-lg">
+        {post.content}
+      </div>
+    </main>
+
+  )
 }
+
+export default BlogPostPage;

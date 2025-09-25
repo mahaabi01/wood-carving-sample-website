@@ -121,38 +121,6 @@ const products: Product[] = [
   },
 ];
 
-
-
-// interface ProductDetailsProps {
-//   params: {slug: string};
-// }
-
-// const ProductDetails: React.FC<ProductDetailsProps> = ({ params }) => {
-//   const { slug } = router.query;
-
-//   const product = products.find((p) => p.slug === slug);
-
-//   if (!product) {
-//     return <p className="p-8 text-center">Product not found.</p>;
-//   }
-
-//   return (
-//     <main className="max-w-4xl mx-auto p-6">
-//       <h1 className="text-3xl font-bold mb-6">{product.name}</h1>
-//       <img
-//         src={product.imageUrl}
-//         alt={product.name}
-//         className="w-full max-h-[400px] object-cover rounded-lg mb-6"
-//       />
-//       <p className="text-gray-700 mb-4">{product.description}</p>
-//       <p className="text-xl font-semibold">Price: Rs. {product.price.toLocaleString()}</p>
-//     </main>
-//   );
-// };
-
-// export default ProductDetails;
-
-
 const ProductDetails: React.FC = () => {
   const params = useParams();
   const slug = params?.id as string;
