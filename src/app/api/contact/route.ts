@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     // Email options
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: process.env.SMTP_USER,
       to: process.env.OWNER_EMAIL,
       subject: `New Query from ${name}`,
       text: `You got a new message from ${name} (${email}): \n\n${message}`,
@@ -31,4 +31,3 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "Failed to send email"}, {status: 500})
   }
 }
-
