@@ -1,0 +1,360 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import { Plus, Search, Edit2, Trash2, X } from "lucide-react";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+  status: "Active" | "Draft";
+}
+
+const demoProducts: Product[] = [
+  {
+    id: "1",
+    name: "Royal Carved Main Door",
+    category: "Main Doors",
+    price: 85000,
+    image: "/Maindoor/door1.jpeg",
+    status: "Active",
+  },
+  {
+    id: "2",
+    name: "Temple Window Frame",
+    category: "Tudal",
+    price: 45000,
+    image: "/Tudal/image1.jpg",
+    status: "Active",
+  },
+  {
+    id: "3",
+    name: "Floral Panel Door",
+    category: "Main Doors",
+    price: 65000,
+    image: "/Maindoor/door4.jpg",
+    status: "Active",
+  },
+  {
+    id: "4",
+    name: "Handcarved Chair",
+    category: "Furniture",
+    price: 28000,
+    image: "/Design/chair_design_1.jpg",
+    status: "Draft",
+  },
+  {
+    id: "5",
+    name: "Peacock Motif Door",
+    category: "Main Doors",
+    price: 95000,
+    image: "/Maindoor/door7.jpg",
+    status: "Active",
+  },
+  {
+    id: "6",
+    name: "Lotus Relief Panel",
+    category: "Main Doors",
+    price: 38000,
+    image: "/Maindoor/door10.jpg",
+    status: "Active",
+  },
+];
+
+export default function AdminProductsPage() {
+  const [products, setProducts] = useState<Product[]>(demoProducts);
+  const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    price: "",
+    image: "",
+  });
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch("/api/categories");
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data);
+      }
+    } catch {
+      console.error("Failed to fetch categories");
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const filtered = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.category.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const handleEdit = (product: Product) => {
+    setEditId(product.id);
+    setForm({
+      name: product.name,
+      category: product.category,
+      price: String(product.price),
+      image: product.image,
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      setProducts(products.filter((p) => p.id !== id));
+    }
+  };
+
+  const handleSave = () => {
+    if (editId) {
+      setProducts(
+        products.map((p) =>
+          p.id === editId
+            ? {
+                ...p,
+                name: form.name,
+                category: form.category,
+                price: Number(form.price),
+                image: form.image,
+              }
+            : p,
+        ),
+      );
+    } else {
+      setProducts([
+        ...products,
+        {
+          id: String(Date.now()),
+          name: form.name,
+          category: form.category,
+          price: Number(form.price),
+          image: form.image || "/Maindoor/door1.jpeg",
+          status: "Draft",
+        },
+      ]);
+    }
+    setShowForm(false);
+    setEditId(null);
+    setForm({ name: "", category: "", price: "", image: "" });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 focus:ring-2 focus:ring-temple-500/20 outline-none text-sm"
+          />
+        </div>
+        <button
+          onClick={() => {
+            setShowForm(true);
+            setEditId(null);
+            setForm({ name: "", category: "", price: "", image: "" });
+          }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-temple-500 text-white rounded-lg hover:bg-temple-600 transition-colors text-sm font-medium"
+        >
+          <Plus size={18} /> Add Product
+        </button>
+      </div>
+
+      {/* Product Table */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="text-left text-xs font-medium text-gray-500 uppercase px-6 py-3">
+                  Product
+                </th>
+                <th className="text-left text-xs font-medium text-gray-500 uppercase px-6 py-3">
+                  Category
+                </th>
+                <th className="text-left text-xs font-medium text-gray-500 uppercase px-6 py-3">
+                  Price (NPR)
+                </th>
+                <th className="text-left text-xs font-medium text-gray-500 uppercase px-6 py-3">
+                  Status
+                </th>
+                <th className="text-right text-xs font-medium text-gray-500 uppercase px-6 py-3">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.map((product) => (
+                <tr
+                  key={product.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {product.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {product.category}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    ₨ {product.price.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${product.status === "Active" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                    >
+                      {product.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {filtered.length === 0 && (
+          <div className="text-center py-12 text-gray-400 text-sm">
+            No products found.
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editId ? "Edit Product" : "Add New Product"}
+              </h3>
+              <button
+                onClick={() => setShowForm(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Product Name
+                </label>
+                <input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm bg-white"
+                >
+                  <option value="">Select category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Price (NPR)
+                </label>
+                <input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Image URL
+                </label>
+                <input
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
+                  placeholder="/Maindoor/door1.jpeg"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowForm(false)}
+                className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 py-2.5 bg-temple-500 text-white rounded-lg hover:bg-temple-600 transition-colors text-sm font-medium"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

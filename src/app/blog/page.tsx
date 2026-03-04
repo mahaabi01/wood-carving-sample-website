@@ -1,109 +1,184 @@
-// blog/index.tsx
-import React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import PageBanner from "@/components/PageBanner";
 
-type BlogPost = {
-  id: number;
-  slug: string;
-  title: string;
-  content: string;
-  date: string;
+import { formatDate } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Blog — Wood Carving Insights & Heritage Stories",
+  description:
+    "Read about wood carving techniques, cultural heritage, artisan stories, and the art of Nepali and Indian woodcraft.",
 };
 
-// sample blog here
-const blogPosts: BlogPost[] = [
+const blogPosts = [
   {
     id: 1,
     slug: "history-of-wood-carving",
-    title: "History of Wood Carving",
-    content:
-      "Wood carving is an ancient art form practiced across many cultures. From the intricate religious sculptures of medieval Europe to the tribal masks of Africa and Oceania, wood carving has served both functional and decorative purposes. Techniques and styles have evolved over centuries, influenced by available materials, cultural beliefs, and technological advancements.",
+    title: "The Ancient History of Wood Carving",
+    excerpt:
+      "Wood carving is an ancient art form practiced across many cultures. From the intricate religious sculptures of medieval Europe to the tribal masks of Africa and Oceania...",
+    content: "Wood carving is an ancient art form...",
+    coverImage: "/Maindoor/door3.jpeg",
     date: "2025-08-01",
+    tags: ["History", "Culture"],
+    author: "Om Wood Carving",
   },
   {
     id: 2,
     slug: "tools-used-in-wood-carving",
-    title: "Tools Used in Wood Carving",
-    content:
-      "Carving tools vary depending on the style and complexity of the work. Some common tools include chisels, gouges, mallets, and knives. Specialized tools like veiners and V-tools help achieve fine details. Modern carvers may also use rotary tools and electric carving knives for precision and speed.",
+    title: "Essential Tools Used in Wood Carving",
+    excerpt:
+      "Carving tools vary depending on the style and complexity of the work. Some common tools include chisels, gouges, mallets, and knives...",
+    content: "Carving tools vary...",
+    coverImage: "/Maindoor/door6.jpg",
     date: "2025-08-05",
+    tags: ["Tools", "Techniques"],
+    author: "Om Wood Carving",
   },
   {
     id: 3,
     slug: "care-and-maintenance-of-wooden-art",
     title: "Care and Maintenance of Wooden Art",
-    content:
-      "To keep wooden art looking beautiful, it is important to regularly dust, avoid direct sunlight, and occasionally treat with wood oils. Humidity control is crucial to prevent cracking or warping. For antique pieces, professional restoration may be necessary to preserve integrity.",
+    excerpt:
+      "To keep wooden art looking beautiful, it is important to regularly dust, avoid direct sunlight, and occasionally treat with wood oils...",
+    content: "To keep wooden art...",
+    coverImage: "/Maindoor/door8.jpg",
     date: "2025-08-10",
+    tags: ["Care", "Tips"],
+    author: "Om Wood Carving",
   },
   {
     id: 4,
     slug: "types-of-wood-for-carving",
-    title: "Types of Wood for Carving",
-    content:
-      "Different woods offer different carving experiences. Basswood and butternut are soft and ideal for beginners. Hardwoods like oak and walnut provide durability but require more effort. Exotic woods such as teak or ebony offer unique aesthetics but may be expensive or difficult to source.",
+    title: "Best Types of Wood for Carving",
+    excerpt:
+      "Different woods offer different carving experiences. Basswood and butternut are soft and ideal for beginners. Hardwoods like oak provide durability...",
+    content: "Different woods offer...",
+    coverImage: "/Maindoor/door10.jpg",
     date: "2025-08-15",
+    tags: ["Materials", "Guide"],
+    author: "Om Wood Carving",
   },
   {
     id: 5,
     slug: "wood-carving-in-cultural-tourism",
     title: "Wood Carving in Cultural Tourism",
-    content:
-      "Wood carving plays a vital role in cultural tourism. Visitors are drawn to traditional workshops, heritage sites, and local markets where artisans demonstrate their craft. In places like Nepal, Bali, and Oaxaca, wood carving is not just an art—it's a cultural experience that supports local economies and preserves ancestral knowledge.",
+    excerpt:
+      "Wood carving plays a vital role in cultural tourism. Visitors are drawn to traditional workshops, heritage sites, and local markets...",
+    content: "Wood carving plays...",
+    coverImage: "/Maindoor/door12.jpg",
     date: "2025-08-20",
+    tags: ["Tourism", "Culture"],
+    author: "Om Wood Carving",
   },
   {
     id: 6,
     slug: "starting-a-wood-carving-business",
     title: "Starting a Wood Carving Business",
-    content:
-      "Launching a wood carving business involves more than mastering the craft. Entrepreneurs must consider branding, online presence, pricing strategies, and sourcing sustainable materials. Collaborating with cultural institutions or tourism boards can boost visibility and connect artisans with global audiences.",
+    excerpt:
+      "Launching a wood carving business involves more than mastering the craft. Entrepreneurs must consider branding, online presence, pricing strategies...",
+    content: "Launching a wood carving...",
+    coverImage: "/Maindoor/door14.jpg",
     date: "2025-08-25",
-  },
-  {
-    id: 7,
-    slug: "exporting-handcrafted-wood-art",
-    title: "Exporting Handcrafted Wood Art",
-    content:
-      "Exporting wood carvings requires understanding international trade regulations, packaging standards, and cultural sensitivities. Artisans can benefit from e-commerce platforms, fair trade certifications, and partnerships with galleries or cultural boutiques abroad. Storytelling and authenticity are key to attracting global buyers.",
-    date: "2025-08-30",
-  },
-  {
-    id: 8,
-    slug: "wood-carving-and-cultural-preservation",
-    title: "Wood Carving and Cultural Preservation",
-    content:
-      "Wood carving is a powerful tool for preserving cultural identity. Through motifs, symbols, and techniques passed down generations, communities safeguard their heritage. Supporting local carvers helps maintain these traditions and ensures that cultural narratives continue to thrive in a modern world.",
-    date: "2025-09-05",
+    tags: ["Business", "Guide"],
+    author: "Om Wood Carving",
   },
 ];
 
-const BlogList: React.FC = () => {
+export default function BlogPage() {
   return (
-    <main className="max-w-4xl mx-auto p-6">
-      <br />
-      <br />
-      <h1 className="text-3xl font-bold mb-8">Blog</h1>
-      <ul className="space-y-6">
-        {blogPosts.map((post) => (
-          <li key={post.id} className="border-b pb-4">
-            <Link href={`/blog/${post.slug}`}>
-              <div className="text-2xl font-semibold text-blue-600 hover:underline">
-                {post.title}
+    <>
+      <PageBanner
+        title="Our Blog"
+        subtitle="Stories, insights, and wisdom from the world of wood carving"
+        imageUrl="/Maindoor/door10.jpg"
+      />
+
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Featured Post */}
+          <div className="mb-16">
+            <Link href={`/blog/${blogPosts[0].slug}`} className="group block">
+              <div className="grid md:grid-cols-2 gap-8 bg-white rounded-xl overflow-hidden shadow-lg border border-wood-100 hover:shadow-xl transition-shadow">
+                <div className="relative aspect-[4/3] md:aspect-auto">
+                  <Image
+                    src={blogPosts[0].coverImage}
+                    alt={blogPosts[0].title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <span className="absolute top-4 left-4 bg-temple-500 text-white text-xs px-3 py-1 rounded-full">
+                    Featured
+                  </span>
+                </div>
+                <div className="p-8 flex flex-col justify-center">
+                  <div className="flex gap-2 mb-3">
+                    {blogPosts[0].tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-xs bg-wood-100 text-wood-600 px-3 py-1 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <h2 className="text-2xl font-bold text-wood-900 mb-3 group-hover:text-temple-500 transition-colors font-[family-name:var(--font-playfair)]">
+                    {blogPosts[0].title}
+                  </h2>
+                  <p className="text-wood-500 mb-4">{blogPosts[0].excerpt}</p>
+                  <p className="text-sm text-wood-400">
+                    {formatDate(blogPosts[0].date)}
+                  </p>
+                </div>
               </div>
             </Link>
-            <p className="text-gray-600">
-              {post.content.split(" ").slice(0, 15).join(" ")}...
-            </p>
+          </div>
 
-            <small className="text-gray-400">
-              {new Date(post.date).toLocaleDateString()}
-            </small>
-          </li>
-        ))}
-      </ul>
-    </main>
+          {/* Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogPosts.slice(1).map((post) => (
+              <Link
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className="group bg-white rounded-xl overflow-hidden shadow-md border border-wood-100 hover:shadow-xl transition-all"
+              >
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <Image
+                    src={post.coverImage}
+                    alt={post.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                </div>
+                <div className="p-5">
+                  <div className="flex gap-2 mb-2">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] bg-wood-100 text-wood-500 px-2 py-0.5 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <h3 className="font-bold text-wood-800 mb-2 group-hover:text-temple-500 transition-colors font-[family-name:var(--font-playfair)]">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-wood-500 line-clamp-2 mb-3">
+                    {post.excerpt}
+                  </p>
+                  <p className="text-xs text-wood-400">
+                    {formatDate(post.date)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
-};
-
-export default BlogList;
+}

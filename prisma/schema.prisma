@@ -1,0 +1,356 @@
+// Om Wood Carving - Prisma Schema
+// PostgreSQL database for Nepali & Indian wood carving e-commerce platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USER & AUTH ────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String?
+  image         String?
+  role          Role      @default(USER)
+  emailVerified DateTime?
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum Role {
+  USER
+  ADMIN
+  ARTISAN
+}
+
+// ─── PRODUCTS & CATEGORIES ─────────────────────────────────
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String?        @db.Text
+  story       String?        @db.Text // Craftsmanship story
+  price       Decimal        @db.Decimal(10, 2)
+  currency    String         @default("NPR")
+  categoryId  String?
+  category    Category?      @relation(fields: [categoryId], references: [id])
+  images      ProductImage[]
+  featured    Boolean        @default(false)
+  inStock     Boolean        @default(true)
+  material    String?        // e.g. "Sal Wood", "Teak"
+  dimensions  String?        // e.g. "120x80x40 cm"
+  weight      String?        // e.g. "15 kg"
+  craftTime   String?        // e.g. "3 weeks"
+  artisan     String?        // Artisan name
+  orderItems  OrderItem[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@index([featured])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  isPrimary Boolean @default(false)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+// ─── ORDERS ────────────────────────────────────────────────
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique @default(cuid())
+  userId         String?
+  user           User?       @relation(fields: [userId], references: [id])
+  customerName   String
+  customerEmail  String
+  customerPhone  String?
+  shippingAddress String     @db.Text
+  country        String      @default("Nepal")
+  items          OrderItem[]
+  subtotal       Decimal     @db.Decimal(10, 2)
+  shippingCost   Decimal     @default(0) @db.Decimal(10, 2)
+  totalAmount    Decimal     @db.Decimal(10, 2)
+  currency       String      @default("NPR")
+  paymentStatus  PaymentStatus @default(PENDING)
+  orderStatus    OrderStatus   @default(PROCESSING)
+  notes          String?     @db.Text
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([orderStatus])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Decimal @db.Decimal(10, 2)
+  quantity  Int     @default(1)
+
+  @@map("order_items")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PROCESSING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ─── BLOG ──────────────────────────────────────────────────
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?  @db.Text
+  content     String   @db.Text
+  coverImage  String?
+  published   Boolean  @default(false)
+  tags        String[] // PostgreSQL array
+  author      String   @default("Om Wood Carving")
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@map("blog_posts")
+}
+
+// ─── HERITAGE / HISTORY ────────────────────────────────────
+model HeritageArticle {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  content     String   @db.Text
+  coverImage  String?
+  era         String?  // e.g. "Malla Period", "Modern"
+  year        String?  // e.g. "1400 AD"
+  sortOrder   Int      @default(0)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("heritage_articles")
+}
+
+// ─── VIDEOS ────────────────────────────────────────────────
+model Video {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?  @db.Text
+  videoUrl    String   // Local path or YouTube embed
+  thumbnailUrl String?
+  published   Boolean  @default(false)
+  duration    String?  // e.g. "5:30"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("videos")
+}
+
+// ─── GALLERY ───────────────────────────────────────────────
+model GalleryCategory {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  slug      String        @unique
+  imageUrl  String?
+  sortOrder Int           @default(0)
+  items     GalleryItem[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("gallery_categories")
+}
+
+model GalleryItem {
+  id         String          @id @default(cuid())
+  name       String
+  imageUrl   String
+  categoryId String
+  category   GalleryCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+
+  @@map("gallery_items")
+}
+
+// ─── TEAM ──────────────────────────────────────────────────
+model TeamMember {
+  id         String   @id @default(cuid())
+  name       String
+  role       String
+  experience String
+  imageUrl   String
+  bio        String?  @db.Text
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+// ─── CONTACT MESSAGES ──────────────────────────────────────
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+// ─── SITE SETTINGS ─────────────────────────────────────────
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+
+  @@map("site_settings")
+}
+
+// ─── TESTIMONIALS ──────────────────────────────────────────
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  location    String?  // e.g. "Kathmandu, Nepal"
+  role        String?  // e.g. "Interior Designer", "Temple Trustee"
+  avatarUrl   String?
+  rating      Int      @default(5) // 1-5 star rating
+  review      String   @db.Text
+  projectType String?  // e.g. "Main Door", "Custom Sculpture"
+  imageUrl    String?  // Optional photo of the installed product
+  featured    Boolean  @default(false)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@index([featured])
+  @@map("testimonials")
+}
+
+// ─── PROJECT SHOWCASES ─────────────────────────────────────
+model Project {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  title        String
+  client       String?        // e.g. "Pashupatinath Temple Trust"
+  location     String?        // e.g. "Kathmandu, Nepal"
+  description  String         @db.Text
+  challenge    String?        @db.Text // Problem/requirement
+  solution     String?        @db.Text // How it was solved
+  result       String?        @db.Text // Outcome achieved
+  coverImage   String
+  images       ProjectImage[]
+  category     String?        // e.g. "Temple Restoration", "Residential"
+  materials    String?        // e.g. "Sal Wood, Teak"
+  duration     String?        // e.g. "3 months"
+  year         String?        // e.g. "2025"
+  featured     Boolean        @default(false)
+  published    Boolean        @default(false)
+  completedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([published])
+  @@index([featured])
+  @@map("projects")
+}
+
+model ProjectImage {
+  id        String  @id @default(cuid())
+  url       String
+  caption   String?
+  sortOrder Int     @default(0)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_images")
+}

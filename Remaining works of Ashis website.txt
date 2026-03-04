@@ -1,0 +1,5 @@
+Remaining works of Ashis website:
+1. Make each image inside gallery clickable and inside that each image detail is shown.
+2. fix the issue in video related content so that video plays properly.
+3. Add other images as necessary.
+4. work on admin site.

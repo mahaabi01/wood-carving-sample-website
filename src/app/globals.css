@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
+/* ─── Om Wood Carving Design System ─────────────────────────
+   Cultural palette: Warm woods, deep reds, aged golds, earthy tones
+   Inspired by Nepali/Indian temple architecture
+   ─────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core palette */
+  --wood-50: #fdf8f3;
+  --wood-100: #f5ead9;
+  --wood-200: #e8d2b3;
+  --wood-300: #d4ad7a;
+  --wood-400: #c18e4f;
+  --wood-500: #a67536;
+  --wood-600: #8b5e2a;
+  --wood-700: #6d4a22;
+  --wood-800: #4a3318;
+  --wood-900: #2d1f0f;
+  --wood-950: #1a1208;
+
+  /* Temple red accents */
+  --temple-50: #fef2f2;
+  --temple-100: #fee2e2;
+  --temple-200: #fca5a5;
+  --temple-300: #f87171;
+  --temple-400: #dc2626;
+  --temple-500: #b91c1c;
+  --temple-600: #991b1b;
+  --temple-700: #7f1d1d;
+
+  /* Heritage gold */
+  --gold-50: #fffbeb;
+  --gold-100: #fef3c7;
+  --gold-200: #fde68a;
+  --gold-300: #fcd34d;
+  --gold-400: #f59e0b;
+  --gold-500: #d97706;
+  --gold-600: #b45309;
+
+  /* Semantic */
+  --background: var(--wood-50);
+  --foreground: var(--wood-900);
+  --surface: #ffffff;
+  --surface-hover: var(--wood-100);
+  --muted: var(--wood-200);
+  --border: var(--wood-200);
+  --primary: var(--temple-500);
+  --primary-hover: var(--temple-600);
+  --accent: var(--gold-500);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-wood-50: var(--wood-50);
+  --color-wood-100: var(--wood-100);
+  --color-wood-200: var(--wood-200);
+  --color-wood-300: var(--wood-300);
+  --color-wood-400: var(--wood-400);
+  --color-wood-500: var(--wood-500);
+  --color-wood-600: var(--wood-600);
+  --color-wood-700: var(--wood-700);
+  --color-wood-800: var(--wood-800);
+  --color-wood-900: var(--wood-900);
+  --color-wood-950: var(--wood-950);
+  --color-temple-50: var(--temple-50);
+  --color-temple-100: var(--temple-100);
+  --color-temple-200: var(--temple-200);
+  --color-temple-300: var(--temple-300);
+  --color-temple-400: var(--temple-400);
+  --color-temple-500: var(--temple-500);
+  --color-temple-600: var(--temple-600);
+  --color-temple-700: var(--temple-700);
+  --color-gold-50: var(--gold-50);
+  --color-gold-100: var(--gold-100);
+  --color-gold-200: var(--gold-200);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --font-sans: var(--font-playfair);
+  --font-body: var(--font-inter);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base styles */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body, "Inter", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans, "Playfair Display", serif);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--wood-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--wood-400);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--wood-500);
+}
+
+/* Selection */
+::selection {
+  background: var(--gold-200);
+  color: var(--wood-900);
+}
+
+/* Decorative ornamental border used for section dividers */
+.ornament-border {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0,10 Q25,0 50,10 Q75,20 100,10 Q125,0 150,10 Q175,20 200,10' fill='none' stroke='%23c18e4f' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 200px 20px;
+  height: 20px;
+}
+
+/* Wooden texture overlay for hero sections */
+.wood-texture-overlay {
+  background-image:
+    linear-gradient(135deg, rgba(166, 117, 54, 0.05) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(166, 117, 54, 0.05) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(166, 117, 54, 0.05) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(166, 117, 54, 0.05) 25%, transparent 25%);
+  background-size: 20px 20px;
+  background-position:
+    10px 0,
+    10px 0,
+    0 0,
+    0 0;
+}
+
+/* Smooth page transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeOutScale {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
 }

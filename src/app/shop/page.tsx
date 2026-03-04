@@ -1,137 +1,154 @@
-// shop/page.tsx
-import React from "react";
-import ProductCard from "@/components/ProductCard";
+import type { Metadata } from "next";
+import PageBanner from "@/components/PageBanner";
+import prisma from "@/lib/prisma";
+import ShopContent from "@/components/ShopFilters";
 
-type Product = {
-  id: number;
-  slug: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
+export const metadata: Metadata = {
+  title: "Shop — Handcrafted Wood Carvings",
+  description:
+    "Browse our collection of handcrafted Nepali & Indian wood carvings — temple doors, windows, sculptures, and architectural pieces.",
 };
 
-// Dummy product data for demo
-const products: Product[] = [
+// Products data (will come from Prisma in production)
+const products = [
   {
-    id: 1,
+    id: "1",
     name: "Wood Carving Art Piece",
     slug: "wood-carving-art-piece",
-    description: "Handmade wooden sculpture with fine details.",
     price: 1500,
-    imageUrl: "/images/carving1.jpg",
+    imageUrl: "/Maindoor/door1.jpeg",
+    category: "Sculpture",
+    material: "Sal Wood",
   },
   {
-    id: 2,
+    id: "2",
     name: "Wooden Wall Panel",
     slug: "wooden-wall-panel",
-    description: "Beautiful carved panel for wall decoration.",
     price: 2500,
-    imageUrl: "/images/carving2.jpg",
+    imageUrl: "/Maindoor/door2.jpeg",
+    category: "Panels",
+    material: "Teak Wood",
   },
   {
-    id: 3,
+    id: "3",
     name: "Decorative Wood Bowl",
     slug: "decorative-wood-bowl",
-    description: "Unique wood bowl with traditional designs.",
     price: 1200,
-    imageUrl: "/images/carving3.jpg",
+    imageUrl: "/Maindoor/door3.jpeg",
+    category: "Decor",
+    material: "Walnut",
   },
   {
-    id: 4,
-    name: "Traditional Wooden Window Frame",
+    id: "4",
+    name: "Traditional Window Frame",
     slug: "traditional-wooden-window-frame",
-    description: "Intricately carved wooden window frame inspired by traditional Nepali architecture.",
     price: 5500,
-    imageUrl: "/images/carving4.jpg",
+    imageUrl: "/Maindoor/door4.jpg",
+    category: "Windows",
+    material: "Sal Wood",
   },
   {
-    id: 5,
+    id: "5",
     name: "Wooden Temple Door",
     slug: "wooden-temple-door",
-    description: "Handcrafted wooden temple-style door with religious motifs.",
     price: 8500,
-    imageUrl: "/images/carving5.jpg",
+    imageUrl: "/Maindoor/door5.jpg",
+    category: "Doors",
+    material: "Teak Wood",
   },
   {
-    id: 6,
+    id: "6",
     name: "Carved Wooden Mask",
     slug: "carved-wooden-mask",
-    description: "Traditional wooden mask used in cultural dances and rituals.",
     price: 3200,
-    imageUrl: "/images/carving6.jpg",
+    imageUrl: "/Maindoor/door6.jpg",
+    category: "Sculpture",
+    material: "Sal Wood",
   },
   {
-    id: 7,
+    id: "7",
     name: "Wooden Jewelry Box",
     slug: "wooden-jewelry-box",
-    description: "Decorative jewelry storage box with fine wood carvings.",
     price: 1800,
-    imageUrl: "/images/carving7.jpg",
+    imageUrl: "/Maindoor/door7.jpg",
+    category: "Decor",
+    material: "Rosewood",
   },
   {
-    id: 8,
+    id: "8",
     name: "Wooden Buddha Statue",
     slug: "wooden-buddha-statue",
-    description: "Sacred wooden Buddha statue carved with peaceful expressions.",
     price: 4500,
-    imageUrl: "/images/carving8.jpg",
+    imageUrl: "/Maindoor/door8.jpg",
+    category: "Sculpture",
+    material: "Sal Wood",
   },
   {
-    id: 9,
-    name: "Carved Wooden Ceiling Panel",
+    id: "9",
+    name: "Carved Ceiling Panel",
     slug: "carved-wooden-ceiling-panel",
-    description: "Decorative ceiling panel showcasing traditional floral patterns.",
     price: 7200,
-    imageUrl: "/images/carving9.jpg",
+    imageUrl: "/Maindoor/door9.jpg",
+    category: "Panels",
+    material: "Teak Wood",
   },
   {
-    id: 10,
+    id: "10",
     name: "Wooden Elephant Sculpture",
     slug: "wooden-elephant-sculpture",
-    description: "Symbolic elephant sculpture carved from high-quality wood.",
     price: 3900,
-    imageUrl: "/images/carving10.jpg",
+    imageUrl: "/Maindoor/door10.jpg",
+    category: "Sculpture",
+    material: "Sal Wood",
   },
   {
-    id: 11,
+    id: "11",
     name: "Traditional Wooden Chair",
     slug: "traditional-wooden-chair",
-    description: "Classic wooden chair with hand-carved backrest and legs.",
     price: 2800,
-    imageUrl: "/images/carving11.jpg",
+    imageUrl: "/Maindoor/door11.jpg",
+    category: "Furniture",
+    material: "Teak Wood",
   },
   {
-    id: 12,
+    id: "12",
     name: "Wooden Serving Tray",
     slug: "wooden-serving-tray",
-    description: "Functional serving tray with ornate woodwork design.",
     price: 1600,
-    imageUrl: "/images/carving12.jpg",
-  },
-  {
-    id: 13,
-    name: "Wooden Wall Hanging Mandala",
-    slug: "wooden-wall-hanging-mandala",
-    description: "Sacred mandala pattern carved into a wooden wall hanging.",
-    price: 3000,
-    imageUrl: "/images/carving13.jpg",
+    imageUrl: "/Maindoor/door12.jpg",
+    category: "Decor",
+    material: "Walnut",
   },
 ];
 
+export default async function ShopPage() {
+  // Fetch categories from DB
+  const dbCategories = await prisma.category.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+  const categoryNames = ["All", ...dbCategories.map((c) => c.name)];
 
-const ShopIndex: React.FC = () => {
   return (
-    <main className="max-w-7xl mx-auto px-4 py-16">
-    <h1 className="text-3xl font-bold mb-8">Our Products</h1>
-    <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-      {products.map((p, i) => (
-      <ProductCard key={i} {...p} />
-      )
-      )}
-    </div>
-    </main>
-  );
-};
+    <>
+      <PageBanner
+        title="Our Collection"
+        subtitle="Handcrafted wood carvings made with centuries-old Nepali & Indian techniques"
+        imageUrl="/Maindoor/door5.jpg"
+      />
 
-export default ShopIndex;
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Dynamic category filters + products */}
+          <ShopContent categories={categoryNames} products={products} />
+
+          {/* Load More */}
+          <div className="text-center mt-12">
+            <button className="px-8 py-3 border-2 border-wood-300 text-wood-700 font-semibold rounded-lg hover:border-gold-500 hover:text-gold-600 transition-colors">
+              Load More Products
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

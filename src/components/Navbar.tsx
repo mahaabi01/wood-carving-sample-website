@@ -1,116 +1,120 @@
-// "use client";
-
-// import Link from "next/link";
-// import { useState } from "react";
-
-// export default function Navbar() {
-//   const [isOpen, setIsOpen] = useState(false);
-
-//   return (
-//     <nav className="bg-white shadow-md fixed w-full z-50">
-//       <div className="container mx-auto flex justify-between items-center px-4 py-3">
-//         {/* Logo */}
-//         <Link href="/" className="text-xl font-bold text-red-600">
-//           Om Wood Carving
-//         </Link>
-
-//         {/* Menu */}
-//         <div className="hidden md:flex space-x-6">
-//           <Link href="/" className="hover:text-red-600">Home</Link>
-//           <Link href="/about" className="hover:text-red-600">About Us</Link>
-//           <Link href="/shop" className="hover:text-red-600">Shop</Link>
-//           <Link href="/gallery" className="hover:text-red-600">Gallery</Link>
-//           <Link href="/blog" className="hover:text-red-600">Our Blog</Link>
-//           <Link href="/contact" className="hover:text-red-600">Contact Us</Link>
-//         </div>
-
-//         {/* CTA Button */}
-//         <div className="hidden md:block">
-//           <Link href="/contact" className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-//             Get a Quote
-//           </Link>
-//         </div>
-
-//         {/* Mobile Menu Button */}
-//         <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-//           ☰
-//         </button>
-//       </div>
-
-//       {/* Mobile Dropdown */}
-//       {isOpen && (
-//         <div className="md:hidden bg-white shadow-lg flex flex-col space-y-2 px-4 py-3">
-//           <Link href="/" onClick={() => setIsOpen(false)}>Home</Link>
-//           <Link href="/about" onClick={() => setIsOpen(false)}>About Us</Link>
-//           <Link href="/shop" onClick={() => setIsOpen(false)}>Shop</Link>
-//           <Link href="/gallery" onClick={() => setIsOpen(false)}>Gallery</Link>
-//           <Link href="/blog" onClick={() => setIsOpen(false)}>Our Blog</Link>
-//           <Link href="/contact" onClick={() => setIsOpen(false)}>Contact Us</Link>
-//         </div>
-//       )}
-//     </nav>
-//   );
-// }
-
-
-// dark mode friendly
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Menu, X, ShoppingBag } from "lucide-react";
+import { NAV_LINKS } from "@/lib/constants";
+import { useCartStore } from "@/store/cart";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { toggleCart, totalItems } = useCartStore();
+
+  useEffect(() => {
+    setMounted(true);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50 transition-colors">
-      <div className="container mx-auto flex justify-between items-center px-4 py-3">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-wood-950/95 backdrop-blur-md shadow-lg py-2"
+          : "bg-transparent py-4"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="text-xl font-bold text-red-600 dark:text-red-400 transition-colors">
-          Om Wood Carving
+        <Link href="/" className="flex items-center gap-2 group">
+          <span className="text-gold-400 text-3xl font-bold font-[family-name:var(--font-playfair)]">
+            ॐ
+          </span>
+          <div className="leading-tight">
+            <span className="block text-lg font-bold text-white font-[family-name:var(--font-playfair)]">
+              Om Wood Carving
+            </span>
+            <span className="block text-[10px] uppercase tracking-[0.25em] text-gold-400">
+              Heritage Woodcraft
+            </span>
+          </div>
         </Link>
 
-        {/* Menu */}
-        <div className="hidden md:flex space-x-6">
-          <Link href="/" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">Home</Link>
-          <Link href="/about" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">About Us</Link>
-          <Link href="/shop" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">Shop</Link>
-          <Link href="/gallery" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">Gallery</Link>
-          <Link href="/team" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">Teams</Link>
-          <Link href="/blog" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">Blogs</Link>
-          <Link href="/contact" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">Contact</Link>
+        {/* Desktop Nav */}
+        <div className="hidden lg:flex items-center gap-1">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="px-3 py-2 text-sm text-wood-200 hover:text-gold-400 transition-colors relative group"
+            >
+              {link.label}
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold-400 group-hover:w-3/4 transition-all duration-300" />
+            </Link>
+          ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="hidden md:block">
+        {/* Right actions */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleCart}
+            className="relative p-2 text-wood-200 hover:text-gold-400 transition-colors"
+            aria-label="Shopping cart"
+          >
+            <ShoppingBag size={22} />
+            {mounted && totalItems() > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-temple-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                {totalItems()}
+              </span>
+            )}
+          </button>
+
           <Link
             href="/contact"
-            className="bg-red-600 text-white dark:bg-red-500 dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
+            className="hidden md:inline-flex items-center px-5 py-2 bg-temple-500 text-white text-sm font-semibold rounded-lg hover:bg-temple-600 transition-colors shadow-lg shadow-temple-500/25"
+          >
+            Get a Quote
+          </Link>
+
+          <button
+            className="lg:hidden p-2 text-white"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div
+        className={`lg:hidden overflow-hidden transition-all duration-300 ${
+          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-wood-950/95 backdrop-blur-md border-t border-wood-800 px-4 py-4 space-y-1">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className="block px-4 py-3 text-wood-200 hover:text-gold-400 hover:bg-wood-800/50 rounded-lg transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <Link
+            href="/contact"
+            onClick={() => setIsOpen(false)}
+            className="block mt-2 text-center px-4 py-3 bg-temple-500 text-white font-semibold rounded-lg hover:bg-temple-600 transition-colors"
           >
             Get a Quote
           </Link>
         </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-gray-900 dark:text-gray-200"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          ☰
-        </button>
       </div>
-
-      {/* Mobile Dropdown */}
-      {isOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg flex flex-col space-y-2 px-4 py-3 transition-colors">
-          <Link href="/" onClick={() => setIsOpen(false)} className="dark:text-gray-200">Home</Link>
-          <Link href="/about" onClick={() => setIsOpen(false)} className="dark:text-gray-200">About Us</Link>
-          <Link href="/shop" onClick={() => setIsOpen(false)} className="dark:text-gray-200">Shop</Link>
-          <Link href="/gallery" onClick={() => setIsOpen(false)} className="dark:text-gray-200">Gallery</Link>
-          <Link href="/blog" onClick={() => setIsOpen(false)} className="dark:text-gray-200">Our Blog</Link>
-          <Link href="/contact" onClick={() => setIsOpen(false)} className="dark:text-gray-200">Contact Us</Link>
-        </div>
-      )}
     </nav>
   );
 }
