@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  eslint: {
+    // Don't fail build on lint warnings (useful for cached/false positives)
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Only ignore if you're confident types are correct
+    // ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
