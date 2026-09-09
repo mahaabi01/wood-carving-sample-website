@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifyAdminToken } from "@/lib/auth";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect admin routes (except login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const token = request.cookies.get("admin-token")?.value;
+    const payload = token ? await verifyAdminToken(token) : null;
 
-    if (!token) {
+    if (!payload) {
       const loginUrl = new URL("/admin/login", request.url);
-      return NextResponse.redirect(loginUrl);
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.delete("admin-token");
+      return response;
     }
   }
 
