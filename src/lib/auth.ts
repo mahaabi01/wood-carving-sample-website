@@ -1,4 +1,4 @@
-import { jwtVerify } from "jose";
+import { jwtVerify } from "jose/jwt/verify";
 
 const JWT_SECRET = process.env.JWT_SECRET || "omwood-secret-key";
 const encodedSecret = new TextEncoder().encode(JWT_SECRET);
