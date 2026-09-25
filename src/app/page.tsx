@@ -8,46 +8,6 @@ import Image from "next/image";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 
-// Featured products (will come from database in production)
-const featuredProducts = [
-  {
-    id: "1",
-    name: "Wood Carving Kalash",
-    slug: "wood-carving-kalash",
-    price: 14000,
-    imageUrl: "/sample%20image/image2.jpg",
-    category: "Sculpture",
-    material: "Sal Wood",
-  },
-  {
-    id: "2",
-    name: "Peacock Traditional Window",
-    slug: "peacock-traditional-window",
-    price: 16000,
-    imageUrl: "/sample%20image/image3.jpg",
-    category: "Windows",
-    material: "Teak Wood",
-  },
-  {
-    id: "3",
-    name: "Golden Temple Door",
-    slug: "golden-temple-door",
-    price: 46000,
-    imageUrl: "/sample%20image/image4.jpg",
-    category: "Doors",
-    material: "Sal Wood",
-  },
-  {
-    id: "4",
-    name: "Antique Peacock Window",
-    slug: "antique-peacock-window",
-    price: 42000,
-    imageUrl: "/sample%20image/image5.jpg",
-    category: "Windows",
-    material: "Teak Wood",
-  },
-];
-
 const craftHighlights = [
   {
     icon: "🪵",
@@ -92,6 +52,24 @@ export default async function HomePage() {
     take: 6,
   });
 
+  // Fetch featured in-stock products for the homepage section
+  const dbFeaturedProducts = await prisma.product.findMany({
+    where: { inStock: true },
+    include: { category: true, images: { orderBy: { isPrimary: "desc" } } },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    take: 4,
+  });
+
+  const featuredProducts = dbFeaturedProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    price: Number(p.price),
+    imageUrl: p.images[0]?.url || "/Maindoor/door1.jpeg",
+    category: p.category?.name || "Uncategorized",
+    material: p.material || "N/A",
+  }));
+
   return (
     <>
       <Hero />
@@ -125,28 +103,30 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 px-4 bg-wood-50">
-        <div className="max-w-7xl mx-auto">
-          <SectionHeading
-            label="Our Collection"
-            title="Featured Masterpieces"
-            subtitle="Discover our finest handcrafted wood carvings — each a unique work of art."
-          />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} {...product} />
-            ))}
+      {featuredProducts.length > 0 && (
+        <section className="py-20 px-4 bg-wood-50">
+          <div className="max-w-7xl mx-auto">
+            <SectionHeading
+              label="Our Collection"
+              title="Featured Masterpieces"
+              subtitle="Discover our finest handcrafted wood carvings — each a unique work of art."
+            />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} {...product} />
+              ))}
+            </div>
+            <div className="text-center mt-10">
+              <Link
+                href="/shop"
+                className="inline-flex items-center px-8 py-3 bg-wood-900 text-white font-semibold rounded-lg hover:bg-wood-800 transition-colors"
+              >
+                View Full Collection →
+              </Link>
+            </div>
           </div>
-          <div className="text-center mt-10">
-            <Link
-              href="/shop"
-              className="inline-flex items-center px-8 py-3 bg-wood-900 text-white font-semibold rounded-lg hover:bg-wood-800 transition-colors"
-            >
-              View Full Collection →
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <StatsSection />
 

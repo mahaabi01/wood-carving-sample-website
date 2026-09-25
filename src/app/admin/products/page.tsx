@@ -13,72 +13,23 @@ interface Category {
 interface Product {
   id: string;
   name: string;
-  category: string;
   price: number;
-  image: string;
-  status: "Active" | "Draft";
+  imageUrl: string;
+  inStock: boolean;
+  category: Category | null;
+  categoryId: string | null;
 }
 
-const demoProducts: Product[] = [
-  {
-    id: "1",
-    name: "Royal Carved Main Door",
-    category: "Main Doors",
-    price: 85000,
-    image: "/Maindoor/door1.jpeg",
-    status: "Active",
-  },
-  {
-    id: "2",
-    name: "Temple Window Frame",
-    category: "Tudal",
-    price: 45000,
-    image: "/Tudal/image1.jpg",
-    status: "Active",
-  },
-  {
-    id: "3",
-    name: "Floral Panel Door",
-    category: "Main Doors",
-    price: 65000,
-    image: "/Maindoor/door4.jpg",
-    status: "Active",
-  },
-  {
-    id: "4",
-    name: "Handcarved Chair",
-    category: "Furniture",
-    price: 28000,
-    image: "/Design/chair_design_1.jpg",
-    status: "Draft",
-  },
-  {
-    id: "5",
-    name: "Peacock Motif Door",
-    category: "Main Doors",
-    price: 95000,
-    image: "/Maindoor/door7.jpg",
-    status: "Active",
-  },
-  {
-    id: "6",
-    name: "Lotus Relief Panel",
-    category: "Main Doors",
-    price: 38000,
-    image: "/Maindoor/door10.jpg",
-    status: "Active",
-  },
-];
-
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>(demoProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     name: "",
-    category: "",
+    categoryId: "",
     price: "",
     image: "",
   });
@@ -95,64 +46,106 @@ export default function AdminProductsPage() {
     }
   }, []);
 
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/products?all=true");
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(
+          data.map(
+            (p: {
+              id: string;
+              name: string;
+              price: string;
+              images: { url: string }[];
+              inStock: boolean;
+              category: Category | null;
+              categoryId: string | null;
+            }) => ({
+              id: p.id,
+              name: p.name,
+              price: Number(p.price),
+              imageUrl: p.images?.[0]?.url || "/Maindoor/door1.jpeg",
+              inStock: p.inStock,
+              category: p.category,
+              categoryId: p.categoryId,
+            }),
+          ),
+        );
+      }
+    } catch {
+      console.error("Failed to fetch products");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+    fetchProducts();
+  }, [fetchCategories, fetchProducts]);
 
   const filtered = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase()),
+      (p.category?.name || "").toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleEdit = (product: Product) => {
     setEditId(product.id);
     setForm({
       name: product.name,
-      category: product.category,
+      categoryId: product.categoryId || "",
       price: String(product.price),
-      image: product.image,
+      image: product.imageUrl,
     });
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setProducts(products.filter((p) => p.id !== id));
+      } else {
+        alert("Failed to delete product");
+      }
+    } catch {
+      alert("Failed to delete product");
     }
   };
 
-  const handleSave = () => {
-    if (editId) {
-      setProducts(
-        products.map((p) =>
-          p.id === editId
-            ? {
-                ...p,
-                name: form.name,
-                category: form.category,
-                price: Number(form.price),
-                image: form.image,
-              }
-            : p,
-        ),
-      );
-    } else {
-      setProducts([
-        ...products,
+  const handleSave = async () => {
+    const payload = {
+      name: form.name,
+      categoryId: form.categoryId || null,
+      price: Number(form.price),
+      imageUrl: form.image,
+    };
+
+    try {
+      const res = await fetch(
+        editId ? `/api/products/${editId}` : "/api/products",
         {
-          id: String(Date.now()),
-          name: form.name,
-          category: form.category,
-          price: Number(form.price),
-          image: form.image || "/Maindoor/door1.jpeg",
-          status: "Draft",
+          method: editId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         },
-      ]);
+      );
+      if (res.ok) {
+        await fetchProducts();
+        setShowForm(false);
+        setEditId(null);
+        setForm({ name: "", categoryId: "", price: "", image: "" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Failed to save product");
+      }
+    } catch {
+      alert("Failed to save product");
     }
-    setShowForm(false);
-    setEditId(null);
-    setForm({ name: "", category: "", price: "", image: "" });
   };
 
   return (
@@ -176,7 +169,7 @@ export default function AdminProductsPage() {
           onClick={() => {
             setShowForm(true);
             setEditId(null);
-            setForm({ name: "", category: "", price: "", image: "" });
+            setForm({ name: "", categoryId: "", price: "", image: "" });
           }}
           className="flex items-center gap-2 px-4 py-2.5 bg-temple-500 text-white rounded-lg hover:bg-temple-600 transition-colors text-sm font-medium"
         >
@@ -217,7 +210,7 @@ export default function AdminProductsPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 relative">
                         <Image
-                          src={product.image}
+                          src={product.imageUrl}
                           alt={product.name}
                           fill
                           className="object-cover"
@@ -230,16 +223,16 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {product.category}
+                    {product.category?.name || "Uncategorized"}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     ₨ {product.price.toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${product.status === "Active" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${product.inStock ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}
                     >
-                      {product.status}
+                      {product.inStock ? "In Stock" : "Out of Stock"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -263,9 +256,14 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div className="text-center py-12 text-gray-400 text-sm">
             No products found.
+          </div>
+        )}
+        {loading && (
+          <div className="text-center py-12 text-gray-400 text-sm">
+            Loading products...
           </div>
         )}
       </div>
@@ -301,15 +299,15 @@ export default function AdminProductsPage() {
                   Category
                 </label>
                 <select
-                  value={form.category}
+                  value={form.categoryId}
                   onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
+                    setForm({ ...form, categoryId: e.target.value })
                   }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm bg-white"
                 >
                   <option value="">Select category</option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
+                    <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>
                   ))}

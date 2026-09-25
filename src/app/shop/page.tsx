@@ -9,124 +9,31 @@ export const metadata: Metadata = {
     "Browse our collection of handcrafted Nepali & Indian wood carvings — temple doors, windows, sculptures, and architectural pieces.",
 };
 
-// Products data (will come from Prisma in production)
-const products = [
-  {
-    id: "1",
-    name: "Wood Carving Art Piece",
-    slug: "wood-carving-art-piece",
-    price: 1500,
-    imageUrl: "/Maindoor/door1.jpeg",
-    category: "Sculpture",
-    material: "Sal Wood",
-  },
-  {
-    id: "2",
-    name: "Wooden Wall Panel",
-    slug: "wooden-wall-panel",
-    price: 2500,
-    imageUrl: "/Maindoor/door2.jpeg",
-    category: "Panels",
-    material: "Teak Wood",
-  },
-  {
-    id: "3",
-    name: "Decorative Wood Bowl",
-    slug: "decorative-wood-bowl",
-    price: 1200,
-    imageUrl: "/Maindoor/door3.jpeg",
-    category: "Decor",
-    material: "Walnut",
-  },
-  {
-    id: "4",
-    name: "Traditional Window Frame",
-    slug: "traditional-wooden-window-frame",
-    price: 5500,
-    imageUrl: "/Maindoor/door4.jpg",
-    category: "Windows",
-    material: "Sal Wood",
-  },
-  {
-    id: "5",
-    name: "Wooden Temple Door",
-    slug: "wooden-temple-door",
-    price: 8500,
-    imageUrl: "/Maindoor/door5.jpg",
-    category: "Doors",
-    material: "Teak Wood",
-  },
-  {
-    id: "6",
-    name: "Carved Wooden Mask",
-    slug: "carved-wooden-mask",
-    price: 3200,
-    imageUrl: "/Maindoor/door6.jpg",
-    category: "Sculpture",
-    material: "Sal Wood",
-  },
-  {
-    id: "7",
-    name: "Wooden Jewelry Box",
-    slug: "wooden-jewelry-box",
-    price: 1800,
-    imageUrl: "/Maindoor/door7.jpg",
-    category: "Decor",
-    material: "Rosewood",
-  },
-  {
-    id: "8",
-    name: "Wooden Buddha Statue",
-    slug: "wooden-buddha-statue",
-    price: 4500,
-    imageUrl: "/Maindoor/door8.jpg",
-    category: "Sculpture",
-    material: "Sal Wood",
-  },
-  {
-    id: "9",
-    name: "Carved Ceiling Panel",
-    slug: "carved-wooden-ceiling-panel",
-    price: 7200,
-    imageUrl: "/Maindoor/door9.jpg",
-    category: "Panels",
-    material: "Teak Wood",
-  },
-  {
-    id: "10",
-    name: "Wooden Elephant Sculpture",
-    slug: "wooden-elephant-sculpture",
-    price: 3900,
-    imageUrl: "/Maindoor/door10.jpg",
-    category: "Sculpture",
-    material: "Sal Wood",
-  },
-  {
-    id: "11",
-    name: "Traditional Wooden Chair",
-    slug: "traditional-wooden-chair",
-    price: 2800,
-    imageUrl: "/Maindoor/door11.jpg",
-    category: "Furniture",
-    material: "Teak Wood",
-  },
-  {
-    id: "12",
-    name: "Wooden Serving Tray",
-    slug: "wooden-serving-tray",
-    price: 1600,
-    imageUrl: "/Maindoor/door12.jpg",
-    category: "Decor",
-    material: "Walnut",
-  },
-];
-
 export default async function ShopPage() {
-  // Fetch categories from DB
-  const dbCategories = await prisma.category.findMany({
-    orderBy: { sortOrder: "asc" },
-  });
+  // Fetch categories and in-stock products from DB
+  const [dbCategories, dbProducts] = await Promise.all([
+    prisma.category.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.product.findMany({
+      where: { inStock: true },
+      include: {
+        category: true,
+        images: { orderBy: { isPrimary: "desc" } },
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    }),
+  ]);
+
   const categoryNames = ["All", ...dbCategories.map((c) => c.name)];
+
+  const products = dbProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    price: Number(p.price),
+    imageUrl: p.images[0]?.url || "/Maindoor/door1.jpeg",
+    category: p.category?.name || "Uncategorized",
+    material: p.material || "N/A",
+  }));
 
   return (
     <>

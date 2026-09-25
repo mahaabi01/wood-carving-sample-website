@@ -2,33 +2,33 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
-// GET single testimonial
+// GET single team member
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    const testimonial = await prisma.testimonial.findUnique({ where: { id } });
+    const member = await prisma.teamMember.findUnique({ where: { id } });
 
-    if (!testimonial) {
+    if (!member) {
       return NextResponse.json(
-        { message: "Testimonial not found" },
+        { message: "Team member not found" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json(testimonial);
+    return NextResponse.json(member);
   } catch (error) {
-    console.error("Error fetching testimonial:", error);
+    console.error("Error fetching team member:", error);
     return NextResponse.json(
-      { message: "Failed to fetch testimonial" },
+      { message: "Failed to fetch team member" },
       { status: 500 },
     );
   }
 }
 
-// PUT update testimonial
+// PUT update team member
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -42,33 +42,30 @@ export async function PUT(
     const { id } = await params;
     const body = await req.json();
 
-    const testimonial = await prisma.testimonial.update({
+    const data: Record<string, unknown> = {};
+    if (body.name !== undefined) data.name = body.name;
+    if (body.role !== undefined) data.role = body.role;
+    if (body.experience !== undefined) data.experience = body.experience;
+    if (body.imageUrl !== undefined) data.imageUrl = body.imageUrl;
+    if (body.bio !== undefined) data.bio = body.bio || null;
+    if (body.sortOrder !== undefined) data.sortOrder = body.sortOrder;
+
+    const member = await prisma.teamMember.update({
       where: { id },
-      data: {
-        name: body.name,
-        location: body.location || null,
-        role: body.role || null,
-        avatarUrl: body.avatarUrl || null,
-        rating: body.rating ?? 5,
-        review: body.review,
-        projectType: body.projectType || null,
-        imageUrl: body.imageUrl || null,
-        featured: body.featured ?? false,
-        published: body.published ?? false,
-      },
+      data,
     });
 
-    return NextResponse.json(testimonial);
+    return NextResponse.json(member);
   } catch (error) {
-    console.error("Error updating testimonial:", error);
+    console.error("Error updating team member:", error);
     return NextResponse.json(
-      { message: "Failed to update testimonial" },
+      { message: "Failed to update team member" },
       { status: 500 },
     );
   }
 }
 
-// DELETE testimonial
+// DELETE team member
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -80,12 +77,12 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    await prisma.testimonial.delete({ where: { id } });
-    return NextResponse.json({ message: "Testimonial deleted" });
+    await prisma.teamMember.delete({ where: { id } });
+    return NextResponse.json({ message: "Team member deleted" });
   } catch (error) {
-    console.error("Error deleting testimonial:", error);
+    console.error("Error deleting team member:", error);
     return NextResponse.json(
-      { message: "Failed to delete testimonial" },
+      { message: "Failed to delete team member" },
       { status: 500 },
     );
   }

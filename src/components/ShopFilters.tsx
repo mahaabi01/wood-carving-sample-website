@@ -59,11 +59,12 @@ export default function ShopContent({
 
   // Derive price bounds
   const minPrice = useMemo(
-    () => Math.min(...products.map((p) => p.price)),
+    () => (products.length ? Math.min(...products.map((p) => p.price)) : 0),
     [products],
   );
   const maxPrice = useMemo(
-    () => Math.max(...products.map((p) => p.price)),
+    () =>
+      products.length ? Math.max(...products.map((p) => p.price)) : 100000,
     [products],
   );
 

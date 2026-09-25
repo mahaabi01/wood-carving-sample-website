@@ -1,37 +1,7 @@
 import Image from "next/image";
 import PageBanner from "@/components/PageBanner";
 import SectionHeading from "@/components/SectionHeading";
-
-const teamMembers = [
-  {
-    name: "Ashis Maharjan",
-    role: "Founder & Master Artisan",
-    bio: "With over 20 years of experience in traditional Nepali woodcraft, Ashis founded Om Wood Carving to preserve and share the sacred art of Newari wood carving with the world.",
-    image: "/sample%20image/image2.jpg",
-    specialization: "Temple Architecture & Sacred Motifs",
-  },
-  {
-    name: "Ram Maharjan",
-    role: "Senior Carver",
-    bio: "Ram brings deep knowledge of traditional Malla-era carving techniques, specializing in intricate relief work for doors and windows.",
-    image: "/sample%20image/image3.jpg",
-    specialization: "Relief Carving & Main Doors",
-  },
-  {
-    name: "Sita Shakya",
-    role: "Design Consultant",
-    bio: "Sita bridges the gap between traditional designs and modern aesthetics, helping clients envision pieces that honor heritage while fitting contemporary spaces.",
-    image: "/sample%20image/image4.jpg",
-    specialization: "Design & Client Relations",
-  },
-  {
-    name: "Krishna Dangol",
-    role: "Artisan",
-    bio: "Krishna specializes in creating furniture pieces that combine functional design with traditional carving, ensuring each piece is both beautiful and practical.",
-    image: "/sample%20image/image5.jpg",
-    specialization: "Furniture & Functional Art",
-  },
-];
+import prisma from "@/lib/prisma";
 
 export const metadata = {
   title: "Our Team | Om Wood Carving",
@@ -39,7 +9,11 @@ export const metadata = {
     "Meet the master artisans behind Om Wood Carving — skilled craftspeople preserving Nepal's woodcarving heritage.",
 };
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const teamMembers = await prisma.teamMember.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+
   return (
     <div>
       <PageBanner
@@ -56,41 +30,49 @@ export default function TeamPage() {
             subtitle="Each member of our team carries forward generations of woodcarving knowledge."
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
-            {teamMembers.map((member) => (
-              <div
-                key={member.name}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md border border-wood-100 hover:shadow-xl transition-shadow"
-              >
-                <div className="relative aspect-[4/5] overflow-hidden">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <span className="text-xs bg-gold-500/90 text-wood-900 px-3 py-1 rounded-full font-medium">
-                      {member.specialization}
-                    </span>
+          {teamMembers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+              {teamMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-md border border-wood-100 hover:shadow-xl transition-shadow"
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden">
+                    <Image
+                      src={member.imageUrl}
+                      alt={member.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <span className="text-xs bg-gold-500/90 text-wood-900 px-3 py-1 rounded-full font-medium">
+                        {member.experience}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-wood-900 font-[family-name:var(--font-playfair)]">
+                      {member.name}
+                    </h3>
+                    <p className="text-temple-500 text-sm font-medium mt-1">
+                      {member.role}
+                    </p>
+                    {member.bio && (
+                      <p className="text-wood-500 text-sm mt-3 leading-relaxed line-clamp-3">
+                        {member.bio}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-wood-900 font-[family-name:var(--font-playfair)]">
-                    {member.name}
-                  </h3>
-                  <p className="text-temple-500 text-sm font-medium mt-1">
-                    {member.role}
-                  </p>
-                  <p className="text-wood-500 text-sm mt-3 leading-relaxed line-clamp-3">
-                    {member.bio}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-wood-400 mt-12">
+              Team profiles coming soon.
+            </p>
+          )}
         </div>
       </section>
 

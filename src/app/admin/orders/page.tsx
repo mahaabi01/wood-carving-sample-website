@@ -1,122 +1,110 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Eye, ChevronDown } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Search, ChevronDown } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
+
+type OrderStatus =
+  | "PROCESSING"
+  | "CONFIRMED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
+type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+
+interface OrderItem {
+  id: string;
+  name: string;
+  price: string;
+  quantity: number;
+}
 
 interface Order {
   id: string;
-  customer: string;
-  email: string;
-  product: string;
-  amount: string;
-  date: string;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
-  paymentStatus: "Paid" | "Unpaid" | "Refunded";
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  items: OrderItem[];
+  totalAmount: string;
+  currency: string;
+  orderStatus: OrderStatus;
+  paymentStatus: PaymentStatus;
+  createdAt: string;
 }
 
-const demoOrders: Order[] = [
-  {
-    id: "ORD-001",
-    customer: "Rajesh Kumar",
-    email: "rajesh@email.com",
-    product: "Carved Main Door",
-    amount: "₨ 85,000",
-    date: "2025-07-10",
-    status: "Processing",
-    paymentStatus: "Paid",
-  },
-  {
-    id: "ORD-002",
-    customer: "Maya Sharma",
-    email: "maya@email.com",
-    product: "Temple Window Frame",
-    amount: "₨ 45,000",
-    date: "2025-07-08",
-    status: "Shipped",
-    paymentStatus: "Paid",
-  },
-  {
-    id: "ORD-003",
-    customer: "John Smith",
-    email: "john@email.com",
-    product: "Decorative Panel Set",
-    amount: "₨ 32,000",
-    date: "2025-07-05",
-    status: "Delivered",
-    paymentStatus: "Paid",
-  },
-  {
-    id: "ORD-004",
-    customer: "Anita Paudel",
-    email: "anita@email.com",
-    product: "Custom Tudal Set",
-    amount: "₨ 1,20,000",
-    date: "2025-07-12",
-    status: "Pending",
-    paymentStatus: "Unpaid",
-  },
-  {
-    id: "ORD-005",
-    customer: "David Chen",
-    email: "david@email.com",
-    product: "Carved Chair Pair",
-    amount: "₨ 56,000",
-    date: "2025-07-11",
-    status: "Processing",
-    paymentStatus: "Paid",
-  },
-  {
-    id: "ORD-006",
-    customer: "Sunita Thapa",
-    email: "sunita@email.com",
-    product: "Entrance Archway",
-    amount: "₨ 1,80,000",
-    date: "2025-07-01",
-    status: "Delivered",
-    paymentStatus: "Paid",
-  },
-  {
-    id: "ORD-007",
-    customer: "Michael Brown",
-    email: "michael@email.com",
-    product: "Wall Sculpture",
-    amount: "₨ 22,000",
-    date: "2025-06-28",
-    status: "Cancelled",
-    paymentStatus: "Refunded",
-  },
+const ORDER_STATUSES: OrderStatus[] = [
+  "PROCESSING",
+  "CONFIRMED",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
 ];
 
-const statusColors: Record<string, string> = {
-  Pending: "bg-yellow-50 text-yellow-700",
-  Processing: "bg-blue-50 text-blue-700",
-  Shipped: "bg-purple-50 text-purple-700",
-  Delivered: "bg-green-50 text-green-700",
-  Cancelled: "bg-red-50 text-red-600",
+const statusColors: Record<OrderStatus, string> = {
+  PROCESSING: "bg-blue-50 text-blue-700",
+  CONFIRMED: "bg-indigo-50 text-indigo-700",
+  SHIPPED: "bg-purple-50 text-purple-700",
+  DELIVERED: "bg-green-50 text-green-700",
+  CANCELLED: "bg-red-50 text-red-600",
 };
 
-const paymentColors: Record<string, string> = {
-  Paid: "text-green-600",
-  Unpaid: "text-yellow-600",
-  Refunded: "text-red-500",
+const paymentColors: Record<PaymentStatus, string> = {
+  PENDING: "text-yellow-600",
+  PAID: "text-green-600",
+  FAILED: "text-red-500",
+  REFUNDED: "text-gray-500",
 };
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(demoOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("All");
 
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/orders");
+      if (res.ok) {
+        setOrders(await res.json());
+      }
+    } catch {
+      console.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
   const filtered = orders.filter((o) => {
     const matchSearch =
-      o.customer.toLowerCase().includes(search.toLowerCase()) ||
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.product.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === "All" || o.status === filterStatus;
+      o.customerName.toLowerCase().includes(search.toLowerCase()) ||
+      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+      o.customerEmail.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterStatus === "All" || o.orderStatus === filterStatus;
     return matchSearch && matchStatus;
   });
 
-  const updateStatus = (id: string, status: Order["status"]) => {
-    setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
+  const updateStatus = async (id: string, orderStatus: OrderStatus) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderStatus }),
+      });
+      if (res.ok) {
+        setOrders(
+          orders.map((o) => (o.id === id ? { ...o, orderStatus } : o)),
+        );
+      } else {
+        alert("Failed to update order status");
+      }
+    } catch {
+      alert("Failed to update order status");
+    }
   };
 
   return (
@@ -137,14 +125,7 @@ export default function AdminOrdersPage() {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          {[
-            "All",
-            "Pending",
-            "Processing",
-            "Shipped",
-            "Delivered",
-            "Cancelled",
-          ].map((status) => (
+          {["All", ...ORDER_STATUSES].map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
@@ -173,7 +154,7 @@ export default function AdminOrdersPage() {
                   Customer
                 </th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase px-6 py-3">
-                  Product
+                  Items
                 </th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase px-6 py-3">
                   Amount
@@ -185,7 +166,7 @@ export default function AdminOrdersPage() {
                   Status
                 </th>
                 <th className="text-right text-xs font-medium text-gray-500 uppercase px-6 py-3">
-                  Actions
+                  Update
                 </th>
               </tr>
             </thead>
@@ -198,22 +179,28 @@ export default function AdminOrdersPage() {
                   <td className="px-6 py-4">
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        {order.id}
+                        {order.orderNumber}
                       </p>
-                      <p className="text-xs text-gray-400">{order.date}</p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div>
-                      <p className="text-sm text-gray-900">{order.customer}</p>
-                      <p className="text-xs text-gray-400">{order.email}</p>
+                      <p className="text-sm text-gray-900">
+                        {order.customerName}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {order.customerEmail}
+                      </p>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {order.product}
+                    {order.items.map((i) => i.name).join(", ")}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {order.amount}
+                    {formatPrice(Number(order.totalAmount), order.currency)}
                   </td>
                   <td className="px-6 py-4">
                     <span
@@ -224,42 +211,26 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColors[order.status]}`}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColors[order.orderStatus]}`}
                     >
-                      {order.status}
+                      {order.orderStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="View details"
-                      >
-                        <Eye size={16} />
+                    <div className="relative group inline-block">
+                      <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <ChevronDown size={16} />
                       </button>
-                      <div className="relative group">
-                        <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                          <ChevronDown size={16} />
-                        </button>
-                        <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden group-hover:block z-10">
-                          {[
-                            "Pending",
-                            "Processing",
-                            "Shipped",
-                            "Delivered",
-                            "Cancelled",
-                          ].map((s) => (
-                            <button
-                              key={s}
-                              onClick={() =>
-                                updateStatus(order.id, s as Order["status"])
-                              }
-                              className="block w-full text-left px-4 py-2 text-xs text-gray-600 hover:bg-gray-50"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
+                      <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden group-hover:block z-10">
+                        {ORDER_STATUSES.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => updateStatus(order.id, s)}
+                            className="block w-full text-left px-4 py-2 text-xs text-gray-600 hover:bg-gray-50"
+                          >
+                            {s}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </td>
@@ -268,7 +239,7 @@ export default function AdminOrdersPage() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div className="text-center py-12 text-gray-400 text-sm">
             No orders found.
           </div>

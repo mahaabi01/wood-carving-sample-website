@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAdminFromCookies } from "@/lib/auth";
 
 // GET single project by id or slug
 export async function GET(
@@ -44,6 +45,11 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const admin = await getAdminFromCookies();
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await req.json();
@@ -94,6 +100,11 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const admin = await getAdminFromCookies();
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     await prisma.project.delete({ where: { id } });

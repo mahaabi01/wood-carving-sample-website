@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 
@@ -8,78 +8,95 @@ interface TeamMember {
   id: string;
   name: string;
   role: string;
-  specialization: string;
-  image: string;
+  experience: string;
+  imageUrl: string;
+  bio: string | null;
 }
 
-const demoTeam: TeamMember[] = [
-  {
-    id: "1",
-    name: "Ashis Maharjan",
-    role: "Founder & Master Artisan",
-    specialization: "Temple Architecture",
-    image: "/sample%20image/image2.jpg",
-  },
-  {
-    id: "2",
-    name: "Ram Maharjan",
-    role: "Senior Carver",
-    specialization: "Relief Carving",
-    image: "/sample%20image/image3.jpg",
-  },
-  {
-    id: "3",
-    name: "Sita Shakya",
-    role: "Design Consultant",
-    specialization: "Design & Client Relations",
-    image: "/sample%20image/image4.jpg",
-  },
-  {
-    id: "4",
-    name: "Krishna Dangol",
-    role: "Artisan",
-    specialization: "Furniture & Functional Art",
-    image: "/sample%20image/image5.jpg",
-  },
-];
-
 export default function AdminTeamPage() {
-  const [team, setTeam] = useState<TeamMember[]>(demoTeam);
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     role: "",
-    specialization: "",
-    image: "",
+    experience: "",
+    bio: "",
+    imageUrl: "",
   });
+
+  const fetchTeam = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/team");
+      if (res.ok) {
+        setTeam(await res.json());
+      }
+    } catch {
+      console.error("Failed to fetch team");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTeam();
+  }, [fetchTeam]);
 
   const handleEdit = (member: TeamMember) => {
     setEditId(member.id);
     setForm({
       name: member.name,
       role: member.role,
-      specialization: member.specialization,
-      image: member.image,
+      experience: member.experience,
+      bio: member.bio || "",
+      imageUrl: member.imageUrl,
     });
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Remove this team member?")) {
-      setTeam(team.filter((m) => m.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Remove this team member?")) return;
+    try {
+      const res = await fetch(`/api/team/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setTeam(team.filter((m) => m.id !== id));
+      } else {
+        alert("Failed to delete team member");
+      }
+    } catch {
+      alert("Failed to delete team member");
     }
   };
 
-  const handleSave = () => {
-    if (editId) {
-      setTeam(team.map((m) => (m.id === editId ? { ...m, ...form } : m)));
-    } else {
-      setTeam([...team, { id: String(Date.now()), ...form }]);
+  const handleSave = async () => {
+    const payload = {
+      name: form.name,
+      role: form.role,
+      experience: form.experience,
+      bio: form.bio,
+      imageUrl: form.imageUrl,
+    };
+
+    try {
+      const res = await fetch(editId ? `/api/team/${editId}` : "/api/team", {
+        method: editId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await fetchTeam();
+        setShowForm(false);
+        setEditId(null);
+        setForm({ name: "", role: "", experience: "", bio: "", imageUrl: "" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Failed to save team member");
+      }
+    } catch {
+      alert("Failed to save team member");
     }
-    setShowForm(false);
-    setEditId(null);
-    setForm({ name: "", role: "", specialization: "", image: "" });
   };
 
   return (
@@ -90,7 +107,13 @@ export default function AdminTeamPage() {
           onClick={() => {
             setShowForm(true);
             setEditId(null);
-            setForm({ name: "", role: "", specialization: "", image: "" });
+            setForm({
+              name: "",
+              role: "",
+              experience: "",
+              bio: "",
+              imageUrl: "",
+            });
           }}
           className="flex items-center gap-2 px-4 py-2.5 bg-temple-500 text-white rounded-lg hover:bg-temple-600 transition-colors text-sm font-medium"
         >
@@ -106,7 +129,7 @@ export default function AdminTeamPage() {
           >
             <div className="relative aspect-square">
               <Image
-                src={member.image}
+                src={member.imageUrl}
                 alt={member.name}
                 fill
                 className="object-cover"
@@ -117,7 +140,7 @@ export default function AdminTeamPage() {
               <h3 className="font-semibold text-gray-900">{member.name}</h3>
               <p className="text-sm text-temple-500">{member.role}</p>
               <p className="text-xs text-gray-400 mt-1">
-                {member.specialization}
+                {member.experience}
               </p>
               <div className="flex gap-2 mt-3">
                 <button
@@ -137,6 +160,12 @@ export default function AdminTeamPage() {
           </div>
         ))}
       </div>
+
+      {!loading && team.length === 0 && (
+        <div className="text-center py-12 text-gray-400 text-sm">
+          No team members yet.
+        </div>
+      )}
 
       {/* Modal */}
       {showForm && (
@@ -176,14 +205,26 @@ export default function AdminTeamPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Specialization
+                  Experience
                 </label>
                 <input
-                  value={form.specialization}
+                  value={form.experience}
                   onChange={(e) =>
-                    setForm({ ...form, specialization: e.target.value })
+                    setForm({ ...form, experience: e.target.value })
                   }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
+                  placeholder="e.g. 20+ years"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bio
+                </label>
+                <textarea
+                  value={form.bio}
+                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm resize-none"
                 />
               </div>
               <div>
@@ -191,8 +232,10 @@ export default function AdminTeamPage() {
                   Image URL
                 </label>
                 <input
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  value={form.imageUrl}
+                  onChange={(e) =>
+                    setForm({ ...form, imageUrl: e.target.value })
+                  }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
                   placeholder="/sample%20image/image2.jpg"
                 />

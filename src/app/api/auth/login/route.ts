@@ -35,9 +35,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Access denied" }, { status: 403 });
     }
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET environment variable is required.");
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || "omwood-secret-key",
+      process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAdminFromCookies } from "@/lib/auth";
 
 // GET all testimonials (public: only published; admin: all)
 export async function GET(req: Request) {
@@ -24,6 +25,11 @@ export async function GET(req: Request) {
 
 // POST create a testimonial
 export async function POST(req: Request) {
+  const admin = await getAdminFromCookies();
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const {

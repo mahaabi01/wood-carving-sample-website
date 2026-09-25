@@ -4,15 +4,24 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Seed admin user
-  const hashedPassword = await bcrypt.hash("IloveNepal123", 12);
+  // Seed admin user (credentials must come from the environment — never hardcode them)
+  const adminEmail = process.env.SEED_ADMIN_EMAIL;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      "SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD environment variables are required to seed the admin user.",
+    );
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@omwoodcarving.com" },
-    update: {},
+    where: { email: adminEmail },
+    update: { password: hashedPassword },
     create: {
       name: "Admin",
-      email: "admin@omwoodcarving.com",
+      email: adminEmail,
       password: hashedPassword,
       role: "ADMIN",
     },

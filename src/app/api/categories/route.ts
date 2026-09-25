@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAdminFromCookies } from "@/lib/auth";
 
 // GET all categories
 export async function GET() {
@@ -22,6 +23,11 @@ export async function GET() {
 
 // POST create a category
 export async function POST(req: Request) {
+  const admin = await getAdminFromCookies();
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { name, description, imageUrl, sortOrder } = body;

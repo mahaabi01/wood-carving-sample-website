@@ -1,79 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Edit2, Trash2, X, Search } from "lucide-react";
 
 interface BlogPost {
   id: string;
   title: string;
   slug: string;
+  excerpt: string | null;
+  content: string;
+  coverImage: string | null;
   tags: string[];
-  date: string;
-  status: "Published" | "Draft";
+  published: boolean;
+  createdAt: string;
 }
 
-const demoPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "The Ancient History of Wood Carving",
-    slug: "history-of-wood-carving",
-    tags: ["History", "Culture"],
-    date: "2025-08-01",
-    status: "Published",
-  },
-  {
-    id: "2",
-    title: "Essential Tools Used in Wood Carving",
-    slug: "tools-used-in-wood-carving",
-    tags: ["Tools", "Techniques"],
-    date: "2025-08-05",
-    status: "Published",
-  },
-  {
-    id: "3",
-    title: "Care and Maintenance of Wooden Art",
-    slug: "care-and-maintenance-of-wooden-art",
-    tags: ["Care", "Tips"],
-    date: "2025-08-10",
-    status: "Published",
-  },
-  {
-    id: "4",
-    title: "Best Types of Wood for Carving",
-    slug: "types-of-wood-for-carving",
-    tags: ["Materials", "Guide"],
-    date: "2025-08-15",
-    status: "Draft",
-  },
-  {
-    id: "5",
-    title: "Wood Carving in Cultural Tourism",
-    slug: "wood-carving-in-cultural-tourism",
-    tags: ["Tourism", "Culture"],
-    date: "2025-08-20",
-    status: "Published",
-  },
-  {
-    id: "6",
-    title: "Starting a Wood Carving Business",
-    slug: "starting-a-wood-carving-business",
-    tags: ["Business", "Guide"],
-    date: "2025-08-25",
-    status: "Draft",
-  },
-];
-
 export default function AdminBlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>(demoPosts);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
-    slug: "",
-    tags: "",
+    excerpt: "",
     content: "",
+    coverImage: "",
+    tags: "",
+    published: false,
   });
+
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/blog?all=true");
+      if (res.ok) {
+        setPosts(await res.json());
+      }
+    } catch {
+      console.error("Failed to fetch blog posts");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   const filtered = posts.filter(
     (p) =>
@@ -85,48 +58,69 @@ export default function AdminBlogPage() {
     setEditId(post.id);
     setForm({
       title: post.title,
-      slug: post.slug,
+      excerpt: post.excerpt || "",
+      content: post.content,
+      coverImage: post.coverImage || "",
       tags: post.tags.join(", "),
-      content: "",
+      published: post.published,
     });
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Delete this blog post?")) {
-      setPosts(posts.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this blog post?")) return;
+    try {
+      const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPosts(posts.filter((p) => p.id !== id));
+      } else {
+        alert("Failed to delete post");
+      }
+    } catch {
+      alert("Failed to delete post");
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const tags = form.tags
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
-    if (editId) {
-      setPosts(
-        posts.map((p) =>
-          p.id === editId
-            ? { ...p, title: form.title, slug: form.slug, tags }
-            : p,
-        ),
-      );
-    } else {
-      setPosts([
-        ...posts,
-        {
-          id: String(Date.now()),
-          title: form.title,
-          slug: form.slug || form.title.toLowerCase().replace(/\s+/g, "-"),
-          tags,
-          date: new Date().toISOString().split("T")[0],
-          status: "Draft",
-        },
-      ]);
+
+    const payload = {
+      title: form.title,
+      excerpt: form.excerpt,
+      content: form.content,
+      coverImage: form.coverImage,
+      tags,
+      published: form.published,
+    };
+
+    try {
+      const res = await fetch(editId ? `/api/blog/${editId}` : "/api/blog", {
+        method: editId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await fetchPosts();
+        setShowForm(false);
+        setEditId(null);
+        setForm({
+          title: "",
+          excerpt: "",
+          content: "",
+          coverImage: "",
+          tags: "",
+          published: false,
+        });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Failed to save post");
+      }
+    } catch {
+      alert("Failed to save post");
     }
-    setShowForm(false);
-    setEditId(null);
-    setForm({ title: "", slug: "", tags: "", content: "" });
   };
 
   return (
@@ -150,7 +144,14 @@ export default function AdminBlogPage() {
           onClick={() => {
             setShowForm(true);
             setEditId(null);
-            setForm({ title: "", slug: "", tags: "", content: "" });
+            setForm({
+              title: "",
+              excerpt: "",
+              content: "",
+              coverImage: "",
+              tags: "",
+              published: false,
+            });
           }}
           className="flex items-center gap-2 px-4 py-2.5 bg-temple-500 text-white rounded-lg hover:bg-temple-600 transition-colors text-sm font-medium"
         >
@@ -206,13 +207,13 @@ export default function AdminBlogPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {post.date}
+                    {new Date(post.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${post.status === "Published" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${post.published ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}
                     >
-                      {post.status}
+                      {post.published ? "Published" : "Draft"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -236,7 +237,7 @@ export default function AdminBlogPage() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div className="text-center py-12 text-gray-400 text-sm">
             No posts found.
           </div>
@@ -246,7 +247,7 @@ export default function AdminBlogPage() {
       {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
                 {editId ? "Edit Post" : "New Blog Post"}
@@ -271,13 +272,28 @@ export default function AdminBlogPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Slug
+                  Excerpt
+                </label>
+                <textarea
+                  value={form.excerpt}
+                  onChange={(e) =>
+                    setForm({ ...form, excerpt: e.target.value })
+                  }
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cover Image URL
                 </label>
                 <input
-                  value={form.slug}
-                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                  value={form.coverImage}
+                  onChange={(e) =>
+                    setForm({ ...form, coverImage: e.target.value })
+                  }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
-                  placeholder="auto-generated-from-title"
+                  placeholder="/Maindoor/door3.jpeg"
                 />
               </div>
               <div>
@@ -305,6 +321,19 @@ export default function AdminBlogPage() {
                   placeholder="Write your blog post content..."
                 />
               </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.published}
+                  onChange={(e) =>
+                    setForm({ ...form, published: e.target.checked })
+                  }
+                  className="w-4 h-4 rounded border-gray-300 text-temple-500 focus:ring-temple-500"
+                />
+                <span className="text-sm text-gray-700">
+                  Publish immediately
+                </span>
+              </label>
             </div>
             <div className="flex gap-3 mt-6">
               <button
