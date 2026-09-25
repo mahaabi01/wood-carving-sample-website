@@ -210,7 +210,7 @@ export default async function HomePage() {
                 href="/contact"
                 className="px-8 py-3 bg-temple-500 text-white font-semibold rounded-lg hover:bg-temple-600 transition-colors shadow-lg"
               >
-                Get a Custom Quote
+                Start a Custom Project
               </Link>
               <Link
                 href="/team"

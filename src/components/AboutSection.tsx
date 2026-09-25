@@ -16,7 +16,7 @@ export default function AboutSection() {
             className="relative rounded-xl object-cover shadow-2xl w-full"
           />
           {/* Experience badge */}
-          <div className="absolute -bottom-6 -right-6 bg-wood-900 text-white px-6 py-4 rounded-xl shadow-xl">
+          <div className="absolute bottom-4 right-4 md:-bottom-6 md:-right-6 bg-wood-900 text-white px-6 py-4 rounded-xl shadow-xl">
             <p className="text-3xl font-bold text-gold-400 font-[family-name:var(--font-playfair)]">
               30+
             </p>

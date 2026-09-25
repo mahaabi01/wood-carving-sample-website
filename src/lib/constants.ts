@@ -12,8 +12,10 @@ export const CONTACT = {
   phone: "+977 9803845226",
   email: "info@omwoodcarving.com",
   address: "Bungamati, Lalitpur, Nepal",
-  mapEmbed:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3534.0!2d85.3!3d27.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDM2JzAwLjAiTiA4NcKwMTgnMDAuMCJF!5e0!3m2!1sen!2snp!4v1",
+  // Simple query-based embed (no API key or place-ID needed) — reliably
+  // renders a real map centered on the address, unlike a hand-typed `pb=`
+  // embed string which silently renders blank if malformed.
+  mapEmbed: "https://www.google.com/maps?q=Bungamati,+Lalitpur,+Nepal&output=embed",
 };
 
 export const SOCIAL = {
@@ -23,7 +25,29 @@ export const SOCIAL = {
   youtube: "https://www.youtube.com/@omwoodcarving",
 };
 
+// Single source of truth for homepage/site-wide stats — used by both
+// Hero.tsx and StatsSection.tsx. Update here only.
+export const SITE_STATS = [
+  { value: "100+", label: "Happy Clients" },
+  { value: "30+", label: "Years of Craft" },
+  { value: "500+", label: "Pieces Created" },
+  { value: "5+", label: "Countries Served" },
+] as const;
+
+// Primary nav — kept short and premium-feeling. Blog/Videos live in the
+// footer instead (see FOOTER_LINKS) rather than crowding the top bar.
 export const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Shop", href: "/shop" },
+  { label: "Projects", href: "/projects" },
+  { label: "Heritage", href: "/heritage" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+] as const;
+
+// Footer link list — everything in NAV_LINKS plus secondary sections.
+export const FOOTER_LINKS = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Projects", href: "/projects" },

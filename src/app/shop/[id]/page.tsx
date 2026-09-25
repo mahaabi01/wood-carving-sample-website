@@ -64,8 +64,22 @@ export default function ProductDetailPage() {
 
   if (product === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
-        <p className="text-wood-400">Loading...</p>
+      <div className="pt-20">
+        <div className="max-w-7xl mx-auto px-4 pb-16">
+          <div className="grid md:grid-cols-2 gap-12 animate-pulse">
+            <div className="aspect-[4/3] rounded-xl bg-wood-100" />
+            <div className="space-y-6">
+              <div className="h-3 w-24 bg-wood-100 rounded" />
+              <div className="h-9 w-3/4 bg-wood-100 rounded" />
+              <div className="h-7 w-32 bg-wood-100 rounded" />
+              <div className="space-y-2">
+                <div className="h-4 w-full bg-wood-100 rounded" />
+                <div className="h-4 w-5/6 bg-wood-100 rounded" />
+              </div>
+              <div className="h-14 w-full bg-wood-100 rounded-lg" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

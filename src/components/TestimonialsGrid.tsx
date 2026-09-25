@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Star, Quote, MapPin, ChevronDown } from "lucide-react";
 
 interface Testimonial {
@@ -76,10 +77,12 @@ export default function TestimonialsGrid({
             {/* Product image if available */}
             {t.imageUrl && (
               <div className="relative h-48 overflow-hidden">
-                <img
+                <Image
                   src={t.imageUrl}
                   alt={`${t.name}'s project`}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 {t.featured && (
                   <div className="absolute top-3 left-3 px-2.5 py-1 bg-gold-500 text-white text-[10px] uppercase tracking-wider font-bold rounded-full">
@@ -128,9 +131,11 @@ export default function TestimonialsGrid({
               {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-wood-50">
                 {t.avatarUrl ? (
-                  <img
+                  <Image
                     src={t.avatarUrl}
                     alt={t.name}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover border-2 border-wood-100"
                   />
                 ) : (

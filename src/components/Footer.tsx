@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { CONTACT, SOCIAL, SITE_NAME, NAV_LINKS } from "@/lib/constants";
+import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
+import { CONTACT, SOCIAL, SITE_NAME, FOOTER_LINKS } from "@/lib/constants";
+
+const SOCIAL_ICONS: Record<string, typeof Facebook> = {
+  facebook: Facebook,
+  instagram: Instagram,
+  tiktok: Music2,
+  youtube: Youtube,
+};
 
 export default function Footer() {
   return (
@@ -36,7 +44,7 @@ export default function Footer() {
               Explore
             </h4>
             <ul className="space-y-2">
-              {NAV_LINKS.map((link) => (
+              {FOOTER_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -81,18 +89,21 @@ export default function Footer() {
 
             {/* Social */}
             <div className="flex gap-3 mt-6">
-              {Object.entries(SOCIAL).map(([name, url]) => (
-                <a
-                  key={name}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 bg-wood-800 hover:bg-gold-500 text-wood-300 hover:text-wood-950 rounded-full flex items-center justify-center transition-all text-sm capitalize"
-                  aria-label={name}
-                >
-                  {name[0].toUpperCase()}
-                </a>
-              ))}
+              {Object.entries(SOCIAL).map(([name, url]) => {
+                const Icon = SOCIAL_ICONS[name];
+                return (
+                  <a
+                    key={name}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-wood-800 hover:bg-gold-500 text-wood-300 hover:text-wood-950 rounded-full flex items-center justify-center transition-all"
+                    aria-label={`Om Wood Carving on ${name}`}
+                  >
+                    {Icon && <Icon size={16} strokeWidth={2} />}
+                  </a>
+                );
+              })}
             </div>
           </div>
 

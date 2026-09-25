@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Star, Quote, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface Testimonial {
@@ -81,11 +82,13 @@ export default function TestimonialsSection({
           <div className="flex flex-col md:flex-row gap-8 items-center">
             {/* Image side */}
             {t.imageUrl && (
-              <div className="w-full md:w-1/3 aspect-square rounded-xl overflow-hidden flex-shrink-0">
-                <img
+              <div className="relative w-full md:w-1/3 aspect-square rounded-xl overflow-hidden flex-shrink-0">
+                <Image
                   src={t.imageUrl}
                   alt={`Project by ${t.name}`}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                 />
               </div>
             )}
@@ -122,9 +125,11 @@ export default function TestimonialsSection({
               {/* Author */}
               <div className="flex items-center gap-4">
                 {t.avatarUrl ? (
-                  <img
+                  <Image
                     src={t.avatarUrl}
                     alt={t.name}
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full object-cover border-2 border-gold-500/30"
                   />
                 ) : (

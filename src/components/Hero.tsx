@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SITE_STATS } from "@/lib/constants";
 
 export default function Hero() {
   return (
@@ -36,35 +37,31 @@ export default function Hero() {
         </h1>
 
         <p className="mt-6 text-lg md:text-xl text-wood-200 max-w-2xl leading-relaxed font-[family-name:var(--font-inter)]">
-          Master artisans preserving centuries of Nepali and Indian temple
-          carving traditions — handcrafting doors, windows, sculptures &amp;
-          architectural marvels for collectors and designers worldwide.
+          Handcrafted Newari wood carving from Nepal — traditional temple
+          doors, windows, and sculptures made by hand for collectors,
+          architects, interior designers, hotels, temples, and homeowners
+          around the world.
         </p>
 
         {/* CTA Buttons */}
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
           <Link
-            href="/shop"
+            href="/contact"
             className="px-8 py-4 bg-temple-500 text-white font-semibold rounded-lg hover:bg-temple-600 transition-all shadow-xl shadow-temple-500/30 text-lg"
           >
-            Explore Collection
+            Start a Custom Project
           </Link>
           <Link
-            href="/heritage"
+            href="/projects"
             className="px-8 py-4 border-2 border-gold-400 text-gold-400 font-semibold rounded-lg hover:bg-gold-400 hover:text-wood-900 transition-all text-lg"
           >
-            Our Heritage
+            Explore Our Work
           </Link>
         </div>
 
         {/* Trust indicators */}
         <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10">
-          {[
-            { value: "100+", label: "Happy Clients" },
-            { value: "30+", label: "Years of Craft" },
-            { value: "500+", label: "Pieces Created" },
-            { value: "5+", label: "Countries Served" },
-          ].map((stat) => (
+          {SITE_STATS.map((stat) => (
             <div key={stat.label} className="text-center">
               <p className="text-2xl md:text-3xl font-bold text-gold-400 font-[family-name:var(--font-playfair)]">
                 {stat.value}

@@ -74,9 +74,9 @@ export default function Navbar() {
 
           <Link
             href="/contact"
-            className="hidden md:inline-flex items-center px-5 py-2 bg-temple-500 text-white text-sm font-semibold rounded-lg hover:bg-temple-600 transition-colors shadow-lg shadow-temple-500/25"
+            className="hidden md:inline-flex items-center px-5 py-2 bg-temple-500 text-white text-sm font-semibold rounded-lg hover:bg-temple-600 transition-colors shadow-lg shadow-temple-500/25 whitespace-nowrap"
           >
-            Get a Quote
+            Start a Custom Project
           </Link>
 
           <button
@@ -111,7 +111,7 @@ export default function Navbar() {
             onClick={() => setIsOpen(false)}
             className="block mt-2 text-center px-4 py-3 bg-temple-500 text-white font-semibold rounded-lg hover:bg-temple-600 transition-colors"
           >
-            Get a Quote
+            Start a Custom Project
           </Link>
         </div>
       </div>
