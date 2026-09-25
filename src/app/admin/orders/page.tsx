@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, ChevronDown } from "lucide-react";
+import { Search } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 type OrderStatus =
@@ -60,6 +60,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("All");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -89,6 +90,7 @@ export default function AdminOrdersPage() {
   });
 
   const updateStatus = async (id: string, orderStatus: OrderStatus) => {
+    setUpdatingId(id);
     try {
       const res = await fetch(`/api/orders/${id}`, {
         method: "PATCH",
@@ -104,6 +106,8 @@ export default function AdminOrdersPage() {
       }
     } catch {
       alert("Failed to update order status");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -217,22 +221,20 @@ export default function AdminOrdersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="relative group inline-block">
-                      <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                        <ChevronDown size={16} />
-                      </button>
-                      <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden group-hover:block z-10">
-                        {ORDER_STATUSES.map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => updateStatus(order.id, s)}
-                            className="block w-full text-left px-4 py-2 text-xs text-gray-600 hover:bg-gray-50"
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <select
+                      value={order.orderStatus}
+                      disabled={updatingId === order.id}
+                      onChange={(e) =>
+                        updateStatus(order.id, e.target.value as OrderStatus)
+                      }
+                      className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-700 focus:border-temple-500 outline-none cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+                    >
+                      {ORDER_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
               ))}
