@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import ImageUpload from "@/components/admin/ImageUpload";
 import {
   Plus,
   Pencil,
@@ -233,10 +235,12 @@ export default function AdminProjectsPage() {
             >
               {/* Cover Image */}
               <div className="relative h-44 bg-gray-100">
-                <img
+                <Image
                   src={p.coverImage}
                   alt={p.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <div className="absolute top-3 right-3 flex gap-2">
                   <span
@@ -467,20 +471,12 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Cover Image URL *
-                </label>
-                <input
-                  type="text"
-                  value={form.coverImage}
-                  onChange={(e) =>
-                    setForm({ ...form, coverImage: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-amber-500 outline-none"
-                  placeholder="/images/project-cover.jpg"
-                />
-              </div>
+              <ImageUpload
+                label="Cover Image"
+                value={form.coverImage}
+                onChange={(url) => setForm({ ...form, coverImage: url })}
+                required
+              />
 
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">

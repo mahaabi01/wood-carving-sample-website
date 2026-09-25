@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { Plus, Search, Edit2, Trash2, X } from "lucide-react";
 
 interface Category {
@@ -324,17 +325,11 @@ export default function AdminProductsPage() {
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
-                </label>
-                <input
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
-                  placeholder="/Maindoor/door1.jpeg"
-                />
-              </div>
+              <ImageUpload
+                label="Image"
+                value={form.image}
+                onChange={(url) => setForm({ ...form, image: url })}
+              />
             </div>
             <div className="flex gap-3 mt-6">
               <button

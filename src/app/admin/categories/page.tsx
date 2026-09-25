@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import ImageUpload from "@/components/admin/ImageUpload";
 import {
   Plus,
   Edit2,
@@ -290,19 +291,11 @@ export default function AdminCategoriesPage() {
                   placeholder="Short description for this category..."
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
-                </label>
-                <input
-                  value={form.imageUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, imageUrl: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none text-sm"
-                  placeholder="/Maindoor/door1.jpeg"
-                />
-              </div>
+              <ImageUpload
+                label="Image"
+                value={form.imageUrl}
+                onChange={(url) => setForm({ ...form, imageUrl: url })}
+              />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Sort Order

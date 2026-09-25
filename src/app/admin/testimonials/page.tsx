@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import ImageUpload from "@/components/admin/ImageUpload";
 import {
   Plus,
   Pencil,
@@ -196,9 +198,11 @@ export default function AdminTestimonialsPage() {
               {/* Avatar / Image */}
               <div className="flex-shrink-0">
                 {t.avatarUrl ? (
-                  <img
+                  <Image
                     src={t.avatarUrl}
                     alt={t.name}
+                    width={56}
+                    height={56}
                     className="w-14 h-14 rounded-full object-cover border-2 border-gray-100"
                   />
                 ) : (
@@ -424,34 +428,16 @@ export default function AdminTestimonialsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Avatar URL
-                  </label>
-                  <input
-                    type="text"
-                    value={form.avatarUrl}
-                    onChange={(e) =>
-                      setForm({ ...form, avatarUrl: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-amber-500 outline-none"
-                    placeholder="/images/avatar.jpg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Product Image URL
-                  </label>
-                  <input
-                    type="text"
-                    value={form.imageUrl}
-                    onChange={(e) =>
-                      setForm({ ...form, imageUrl: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-amber-500 outline-none"
-                    placeholder="/images/installed.jpg"
-                  />
-                </div>
+                <ImageUpload
+                  label="Avatar"
+                  value={form.avatarUrl}
+                  onChange={(url) => setForm({ ...form, avatarUrl: url })}
+                />
+                <ImageUpload
+                  label="Project Image"
+                  value={form.imageUrl}
+                  onChange={(url) => setForm({ ...form, imageUrl: url })}
+                />
               </div>
 
               <div className="flex items-center gap-6 pt-2">

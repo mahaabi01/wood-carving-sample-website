@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { Plus, Edit2, Trash2, X, Search } from "lucide-react";
 
 interface BlogPost {
@@ -283,19 +284,11 @@ export default function AdminBlogPage() {
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm resize-none"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cover Image URL
-                </label>
-                <input
-                  value={form.coverImage}
-                  onChange={(e) =>
-                    setForm({ ...form, coverImage: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
-                  placeholder="/Maindoor/door3.jpeg"
-                />
-              </div>
+              <ImageUpload
+                label="Cover Image"
+                value={form.coverImage}
+                onChange={(url) => setForm({ ...form, coverImage: url })}
+              />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tags (comma separated)

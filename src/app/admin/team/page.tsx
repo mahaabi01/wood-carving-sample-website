@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 
 interface TeamMember {
@@ -227,19 +228,11 @@ export default function AdminTeamPage() {
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm resize-none"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
-                </label>
-                <input
-                  value={form.imageUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, imageUrl: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-temple-500 outline-none text-sm"
-                  placeholder="/sample%20image/image2.jpg"
-                />
-              </div>
+              <ImageUpload
+                label="Image"
+                value={form.imageUrl}
+                onChange={(url) => setForm({ ...form, imageUrl: url })}
+              />
             </div>
             <div className="flex gap-3 mt-6">
               <button
