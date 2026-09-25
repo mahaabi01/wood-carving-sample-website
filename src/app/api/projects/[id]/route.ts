@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
@@ -85,6 +86,9 @@ export async function PUT(
       include: { images: true },
     });
 
+    revalidatePath("/projects");
+    revalidatePath(`/projects/${project.slug}`);
+
     return NextResponse.json(project);
   } catch (error) {
     console.error("Error updating project:", error);
@@ -107,7 +111,11 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    await prisma.project.delete({ where: { id } });
+    const deleted = await prisma.project.delete({ where: { id } });
+
+    revalidatePath("/projects");
+    revalidatePath(`/projects/${deleted.slug}`);
+
     return NextResponse.json({ message: "Project deleted" });
   } catch (error) {
     console.error("Error deleting project:", error);

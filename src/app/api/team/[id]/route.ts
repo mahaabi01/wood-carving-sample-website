@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
@@ -55,6 +56,8 @@ export async function PUT(
       data,
     });
 
+    revalidatePath("/team");
+
     return NextResponse.json(member);
   } catch (error) {
     console.error("Error updating team member:", error);
@@ -78,6 +81,9 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.teamMember.delete({ where: { id } });
+
+    revalidatePath("/team");
+
     return NextResponse.json({ message: "Team member deleted" });
   } catch (error) {
     console.error("Error deleting team member:", error);

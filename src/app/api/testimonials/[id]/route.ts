@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
@@ -58,6 +59,9 @@ export async function PUT(
       },
     });
 
+    revalidatePath("/");
+    revalidatePath("/testimonials");
+
     return NextResponse.json(testimonial);
   } catch (error) {
     console.error("Error updating testimonial:", error);
@@ -81,6 +85,10 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.testimonial.delete({ where: { id } });
+
+    revalidatePath("/");
+    revalidatePath("/testimonials");
+
     return NextResponse.json({ message: "Testimonial deleted" });
   } catch (error) {
     console.error("Error deleting testimonial:", error);

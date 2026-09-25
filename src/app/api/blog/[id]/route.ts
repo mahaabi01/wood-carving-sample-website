@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
@@ -77,6 +78,9 @@ export async function PUT(
       data,
     });
 
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${post.slug}`);
+
     return NextResponse.json(post);
   } catch (error) {
     console.error("Error updating blog post:", error);
@@ -99,7 +103,11 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    await prisma.blogPost.delete({ where: { id } });
+    const deleted = await prisma.blogPost.delete({ where: { id } });
+
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${deleted.slug}`);
+
     return NextResponse.json({ message: "Blog post deleted" });
   } catch (error) {
     console.error("Error deleting blog post:", error);

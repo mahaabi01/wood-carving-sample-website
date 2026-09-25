@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
@@ -46,6 +47,8 @@ export async function POST(req: Request) {
         sortOrder: sortOrder ?? 0,
       },
     });
+
+    revalidatePath("/team");
 
     return NextResponse.json(member, { status: 201 });
   } catch (error) {

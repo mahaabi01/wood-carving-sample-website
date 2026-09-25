@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { getAdminFromCookies } from "@/lib/auth";
 
@@ -92,6 +93,9 @@ export async function PUT(
       include: { category: true, images: true },
     });
 
+    revalidatePath("/");
+    revalidatePath("/shop");
+
     return NextResponse.json(product);
   } catch (error) {
     console.error("Error updating product:", error);
@@ -115,6 +119,10 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.product.delete({ where: { id } });
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+
     return NextResponse.json({ message: "Product deleted" });
   } catch (error) {
     console.error("Error deleting product:", error);
