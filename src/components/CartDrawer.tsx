@@ -124,11 +124,11 @@ export default function CartDrawer() {
               <span className="text-wood-900">{formatPrice(totalPrice())}</span>
             </div>
             <Link
-              href="/contact"
+              href="/checkout"
               onClick={closeCart}
               className="block w-full text-center py-3 bg-temple-500 text-white font-semibold rounded-lg hover:bg-temple-600 transition-colors"
             >
-              Request Quote / Order
+              Checkout
             </Link>
             <button
               onClick={clearCart}
